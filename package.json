@@ -1,0 +1,19 @@
+{
+  "name": "octopusfantasy-server",
+  "version": "1.0.0",
+  "description": "REST API server for Octopus Fantasy",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "MoonWanki",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "cors": "^2.8.5",
+    "dotenv": "^6.2.0",
+    "express": "^4.16.4",
+    "mongoose": "^5.4.3",
+    "request": "^2.88.0"
+  }
+}
