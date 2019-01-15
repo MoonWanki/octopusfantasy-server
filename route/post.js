@@ -11,6 +11,7 @@ const Post = require('../models/post');
 
 // GET: skip번째 최근 MUSIC 또는 모든 MUSIC
 router.get('/', (req, res) => {
+    console.log("post - get");
     Post.find({})
     .then(posts => res.send(posts))
     .catch(err => res.status(500).send(err));

@@ -26,5 +26,6 @@ app.use('/naverapi', require('./route/naverapi'));
 app.use('/kakaoapi', require('./route/kakaoapi'));
 app.use('/comment', require('./route/comment'));
 app.use('/mahjong', require('./route/mahjong'));
+app.use('/user', require('./route/user'));
 
 app.listen(port, () => console.log(`Server listening on port ${port}`));
