@@ -27,5 +27,6 @@ app.use('/kakaoapi', require('./route/kakaoapi'));
 app.use('/comment', require('./route/comment'));
 app.use('/mahjong', require('./route/mahjong'));
 app.use('/oauth', require('./route/oauth'))
+app.use('/user', require('./route/user'));
 
 app.listen(port, () => console.log(`Server listening on port ${port}`));
