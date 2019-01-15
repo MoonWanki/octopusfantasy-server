@@ -15,9 +15,9 @@ app.use(bodyParser.json());
 
 mongoose.Promise = global.Promise;
 
-mongoose.connect(process.env.MONGO_URI, {useNewUrlParser: true})
-.then(() => console.log('MongoDB Connected'))
-.catch(e => console.error(e));
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true })
+    .then(() => console.log('MongoDB Connected'))
+    .catch(e => console.error(e));
 
 app.use(cors());
 
@@ -26,5 +26,6 @@ app.use('/naverapi', require('./route/naverapi'));
 app.use('/kakaoapi', require('./route/kakaoapi'));
 app.use('/comment', require('./route/comment'));
 app.use('/mahjong', require('./route/mahjong'));
+app.use('/oauth', require('./route/oauth'))
 
 app.listen(port, () => console.log(`Server listening on port ${port}`));
