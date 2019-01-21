@@ -1,6 +1,8 @@
 const router = require('express').Router();
 const User = require('../models/user');
 
+const userapi = require('../api/userapi')
+
 /*
 user CRUD
 
@@ -11,17 +13,14 @@ PUT /user
 /DELETE /user/:id
 */
 
-router.get('/', (req, res) => {
-    User.find({})
-    .then(user => res.send(user))
-    .catch(err => res.status(500).send(err));
-});
+router.get('/', userapi.usergetAll);
 
-router.get('/:id', (req, res) => {
-    console.log(req.params);
-    User.findOne({id: req.params.id})
-    .then(user => res.send(user))
-    .catch(err => res.status(500).send(err));
-});
+router.get('/:id', userapi.usergetbyid);
+
+router.post('/', userapi.userinsert)
+//만들어는 두겠지만 user update가 필요한지는 의문
+router.put('/:id', userapi.userupdatebyid);
+
+router.delete('/:id', userapi.userdelete);
 
 module.exports = router;
