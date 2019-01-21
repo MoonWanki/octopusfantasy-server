@@ -1,6 +1,8 @@
 const router = require('express').Router();
 const axios = require('axios');
 
+const userapi = require('../api/userapi');
+
 router.get('/naver', (req, res) => {
     // 토큰 요청
     // 'code' and 'state' must be in query!
@@ -35,6 +37,7 @@ router.get('/naver', (req, res) => {
             profileImage: data.response.profile_image,
             email: data.response.email
         }
+        userapi.userinsertByOauth(profile, res);
         res.send(profile)
     }).catch(err => res.sendStatus(401).send(err))
 })
@@ -74,6 +77,7 @@ router.get('/kakao', (req, res) => {
             profileImage: data.properties.thumbnail_image,
             email: email || "",
         }
+        userapi.userinsert()
         res.send(profile)
     }).catch(err => res.sendStatus(401).send(err))
 })
