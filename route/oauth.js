@@ -2,6 +2,7 @@ const router = require('express').Router();
 const axios = require('axios');
 
 const userapi = require('../api/userapi');
+const session = require('../api/loginapi');
 
 router.get('/naver', (req, res) => {
     // 토큰 요청
@@ -37,8 +38,8 @@ router.get('/naver', (req, res) => {
             profileImage: data.response.profile_image,
             email: data.response.email
         }
-        userapi.userinsertByOauth(profile, res);
-        res.send(profile)
+    }).then(({profile}) => {
+        session.sessionget(profile, req, res);
     }).catch(err => res.sendStatus(401).send(err))
 })
 

@@ -22,15 +22,12 @@ exports.userinsert = (req, res) => {
 }
 
 exports.userinsertByOauth = (profile, res) => {
-    const id = profile.id;
-    User.findOne({id : id}, (err, user) => {
-        if(err) return res.status(500).send(err);
-        if(!user) {
-            User.create(profile)
-            .then(res.send(profile))
-            .catch(err => res.status(500).send(err));
-        }
-    });
+    User.findOneAndUpdate( //conditions, update, options, callback
+        {id : profile.id},
+        profile,
+        {upsert : true}
+    )
+    .catch(err => res.status(500).send(err));
 };
 
 exports.userupdatebyid = (req, res) => {
