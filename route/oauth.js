@@ -38,9 +38,11 @@ router.get('/naver', (req, res) => {
             profileImage: data.response.profile_image,
             email: data.response.email
         }
+        userapi.userinsertByOauth(profile, res); //로그인한 사용자에 대한 insert and update
     }).then(({profile}) => {
-        session.sessionget(profile, req, res);
-    }).catch(err => res.sendStatus(401).send(err))
+        session.sessionget(profile, req, res); //db 저장과는 별도로 session 제공 및 사용
+    }).then(/*session 받고 로그인 완료 후 redirect, 여기 then에는 redirect만 들어가면 될 듯*/)
+    .catch(err => res.sendStatus(401).send(err))
 })
 
 router.get('/kakao', (req, res) => {
