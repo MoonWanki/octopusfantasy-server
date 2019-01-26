@@ -4,85 +4,74 @@ const axios = require('axios');
 const userapi = require('../api/userapi');
 const session = require('../api/loginapi');
 
-router.get('/naver', (req, res) => {
-    // 토큰 요청
-    // 'code' and 'state' must be in query!
-    axios({
-        method: 'GET',
-        url: `https://nid.naver.com/oauth2.0/token
-            ?grant_type=authorization_code
-            &client_id=${process.env.NAVER_API_KEY}
-            &client_secret=${process.env.NAVER_API_SECRET}
-            &redirect_uri=${process.env.NAVER_REDIRECT_URI}
-            &code=${req.query.code}
-            &state=${req.query.state}`,
-        validateStatus: status => status == 200,
-    }).then(({ data }) => {
-        console.log(data)
-        const accessToken = data.access_token
+const oauthConfig = {
+    NAVER: {
+        URL_TOKEN: 'https://nid.naver.com/oauth2.0/token',
+        URL_PROFILE: 'https://openapi.naver.com/v1/nid/me',
+        API_KEY: process.env.NAVER_API_KEY,
+        API_SECRET: process.env.NAVER_API_SECRET,
+    },
+    KAKAO: {
+        URL_TOKEN: 'https://kauth.kakao.com/oauth/token',
+        URL_PROFILE: 'https://kapi.kakao.com/v2/user/me',
+        API_KEY: process.env.KAKAO_API_KEY,
+        API_SECRET: process.env.KAKAO_API_SECRET,
+    },
+}
 
-        // 프로필 요청
+router.get('/naver', async (req, res) => {
+    const { code, state } = req.query
+    const data = await getProfile(oauthConfig.NAVER, code, state)
+    const profile = {
+        id: data.response.id,
+        nickname: data.response.nickname,
+        profileImage: data.response.profile_image,
+        email: data.response.email
+    }
+    console.log(profile)
+    userapi.userinsertByOauth(profile, res) //로그인한 사용자에 대한 insert and update
+    //session.sessionget(profile, req, res); //db 저장과는 별도로 session 제공 및 사용
+    res.redirect(state)
+})
+
+
+router.get('/kakao', async (req, res) => {
+    const { code, state } = req.query
+    const data = await getProfile(oauthConfig.KAKAO, code, state)
+    const profile = {
+        id: data.id,
+        nickname: data.properties.nickname,
+        profileImage: data.properties.thumbnail_image,
+        email: data.kakao_account.email,
+    }
+    console.log(profile)
+    userapi.userinsertByOauth(profile, res) //로그인한 사용자에 대한 insert and update
+    //session.sessionget(profile, req, res); //db 저장과는 별도로 session 제공 및 사용
+    res.redirect(state)
+})
+
+const getProfile = (config, code, state) => axios({
+        method: 'GET',
+        url: config.URL_TOKEN,
+        params: {
+            'grant_type': 'authorization_code',
+            'client_id': config.API_KEY,
+            'client_secret': config.API_SECRET,
+            'code': code,
+            'state': encodeURIComponent(state),
+        },
+        validateStatus: status => status == 200,
+    }).then(res => {
+        const accessToken = res.data.access_token
         return axios({
             method: 'GET',
-            url: 'https://openapi.naver.com/v1/nid/me',
+            url: config.URL_PROFILE,
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
                 'content-type': 'application/x-www-form-urlencoded',
             },
             validateStatus: status => status == 200,
         })
-    }).then(({ data }) => {
-        const profile = {
-            id: data.response.id,
-            nickname: data.response.nickname,
-            profileImage: data.response.profile_image,
-            email: data.response.email
-        }
-        userapi.userinsertByOauth(profile, res); //로그인한 사용자에 대한 insert and update
-    }).then(({profile}) => {
-        session.sessionget(profile, req, res); //db 저장과는 별도로 session 제공 및 사용
-    }).then(/*session 받고 로그인 완료 후 redirect, 여기 then에는 redirect만 들어가면 될 듯*/)
-    .catch(err => res.sendStatus(401).send(err))
-})
-
-router.get('/kakao', (req, res) => {
-    // 토큰 요청
-    // 'code' must be in query!
-    axios({
-        method: 'POST',
-        url: 'https://kauth.kakao.com/oauth/token',
-        headers: {
-            grant_type: 'authorization_code',
-            client_id: process.env.KAKAO_API_KEY,
-            redirect_uri: process.env.KAKAO_REDIRECT_URI,
-            code: req.query.code,
-        },
-        validateStatus: status => status == 200,
-    }).then(({ data }) => {
-        console.log(data)
-        const accessToken = data.access_token;
-
-        // 프로필 요청
-        return axios({
-            method: 'POST',
-            url: 'https://kapi.kakao.com/v2/user/me',
-            headers: {
-                'cache-control': 'no-cache',
-                'Authorization': 'Bearer ' + accessToken,
-                'content-type': 'application/x-www-form-urlencoded',
-            },
-            validateStatus: status => status == 200,
-        })
-    }).then(({ data }) => {
-        const profile = {
-            id: data.id,
-            nickname: data.properties.nickname,
-            profileImage: data.properties.thumbnail_image,
-            email: email || "",
-        }
-        userapi.userinsert()
-        res.send(profile)
-    }).catch(err => res.sendStatus(401).send(err))
-})
+    }).then(res => res.data)
 
 module.exports = router;
