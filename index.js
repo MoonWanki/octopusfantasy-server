@@ -3,6 +3,7 @@ require('dotenv').config();
 // module definition
 const express = require('express');
 const session = require('express-session');
+const cookie = require('cookie-parser');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -27,7 +28,8 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true })
     .then(() => console.log('MongoDB Connected'))
     .catch(e => console.error(e));
 
-//session
+//login
+    //session
 app.use(session({
     name : 'OctopusyFantasy',
     secret : 'encryptionPrivateKey',
@@ -35,6 +37,9 @@ app.use(session({
     saveUninitialized : true,
     store : require('mongoose-session')(mongoose)
 }));
+
+    //cookie
+app.use(cookie('!@!#!@!'));
 
 //security
     //helmet

@@ -21,7 +21,7 @@ exports.userinsert = (req, res) => {
     })
 }
 
-exports.userinsertByOauth = (profile, res) => {
+exports.userinsertByOauth = (profile, req, res) => {
     User.findOneAndUpdate( //conditions, update, options, callback
         {id : profile.id},
         profile,

@@ -28,10 +28,15 @@ router.get('/naver', async (req, res) => {
         profileImage: data.response.profile_image,
         email: data.response.email
     }
-    console.log(profile)
-    userapi.userinsertByOauth(profile, res) //로그인한 사용자에 대한 insert and update
-    //session.sessionget(profile, req, res); //db 저장과는 별도로 session 제공 및 사용
+    console.log("id in cookie : ", req.cookies.sessionId);
+    console.log("id in session : ", req.session.id);
+    if(req.cookies.sessionId != req.session.id) { //세션 없음
+        console.log("i will make you");
+        userapi.userinsertByOauth(profile, req, res) //로그인한 사용자에 대한 insert and update
+        session.sessionGet(profile, req, res);//세션 제공
+    }
     res.redirect(state)
+
 })
 
 
@@ -46,7 +51,7 @@ router.get('/kakao', async (req, res) => {
     }
     console.log(profile)
     userapi.userinsertByOauth(profile, res) //로그인한 사용자에 대한 insert and update
-    //session.sessionget(profile, req, res); //db 저장과는 별도로 session 제공 및 사용
+    session.sessionGet(profile, req, res);
     res.redirect(state)
 })
 
