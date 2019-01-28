@@ -1,7 +1,6 @@
 const User = require('../models/user');
 
 exports.sessionGet = (user, req, res) => { //in user, id, email, nickname, profileimage
-    console.log("find complete");
     req.session.logined = true;
     req.session.ID = user.id;
     req.session.email = user.email;
@@ -14,4 +13,9 @@ exports.sessionGet = (user, req, res) => { //in user, id, email, nickname, profi
         httpOnly : true
     });
     //cookie 날림
+}
+
+exports.sessionOut = (req, res) => {
+    //when user request Log-out, session is destroyed
+    req.session.destroy(() => {req.session});
 }

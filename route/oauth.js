@@ -28,18 +28,18 @@ router.get('/naver', async (req, res) => {
         profileImage: data.response.profile_image,
         email: data.response.email
     }
+    userapi.userinsertByOauth(profile, req, res) //로그인한 사용자에 대한 insert and update
     console.log("id in cookie : ", req.cookies.sessionId);
     console.log("id in session : ", req.session.id);
     if(req.cookies.sessionId != req.session.id) { //세션 없음
         console.log("i will make you");
-        userapi.userinsertByOauth(profile, req, res) //로그인한 사용자에 대한 insert and update
         session.sessionGet(profile, req, res);//세션 제공
     }
     res.redirect(state)
 
 })
 
-
+/* 
 router.get('/kakao', async (req, res) => {
     const { code, state } = req.query
     const data = await getProfile(oauthConfig.KAKAO, code, state)
@@ -53,7 +53,7 @@ router.get('/kakao', async (req, res) => {
     userapi.userinsertByOauth(profile, res) //로그인한 사용자에 대한 insert and update
     session.sessionGet(profile, req, res);
     res.redirect(state)
-})
+}) */
 
 const getProfile = (config, code, state) => axios({
         method: 'GET',
