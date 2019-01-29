@@ -6,6 +6,7 @@ const session = require('express-session');
 const cookie = require('cookie-parser');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const mongoStore = require('connect-mongo')(session);
 const cors = require('cors');
 const helmet = require('helmet');
 
@@ -35,7 +36,10 @@ app.use(session({
     secret : 'encryptionPrivateKey',
     resave : true,
     saveUninitialized : true,
-    store : require('mongoose-session')(mongoose)
+    store : new mongoStore({
+        url : process.env.MONGO_URI,
+        ttl : 3600*24
+    })
 }));
 
     //cookie
