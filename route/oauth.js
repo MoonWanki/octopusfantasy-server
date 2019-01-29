@@ -10,24 +10,30 @@ const oauthConfig = {
         URL_PROFILE: 'https://openapi.naver.com/v1/nid/me',
         API_KEY: process.env.NAVER_API_KEY,
         API_SECRET: process.env.NAVER_API_SECRET,
+        profileParser: data => ({
+            id: data.response.id,
+            nickname: data.response.nickname,
+            profileImage: data.response.profile_image,
+            email: data.response.email,
+        }),
     },
     KAKAO: {
         URL_TOKEN: 'https://kauth.kakao.com/oauth/token',
         URL_PROFILE: 'https://kapi.kakao.com/v2/user/me',
         API_KEY: process.env.KAKAO_API_KEY,
         API_SECRET: process.env.KAKAO_API_SECRET,
+        profileParser: data => ({
+            id: data.id,
+            nickname: data.properties.nickname,
+            profileImage: data.properties.thumbnail_image,
+            email: data.kakao_account.email,
+        }),
     },
 }
 
 router.get('/naver', async (req, res) => {
     const { code, state } = req.query
-    const data = await getProfile(oauthConfig.NAVER, code, state)
-    const profile = {
-        id: data.response.id,
-        nickname: data.response.nickname,
-        profileImage: data.response.profile_image,
-        email: data.response.email
-    }
+    const profile = await getProfile(oauthConfig.NAVER, code, state)
     console.log("id in cookie : ", req.cookies.sessionId);
     console.log("id in session : ", req.session.id);
     if(req.cookies.sessionId != req.session.id) { //세션 없음
@@ -42,13 +48,7 @@ router.get('/naver', async (req, res) => {
 
 router.get('/kakao', async (req, res) => {
     const { code, state } = req.query
-    const data = await getProfile(oauthConfig.KAKAO, code, state)
-    const profile = {
-        id: data.id,
-        nickname: data.properties.nickname,
-        profileImage: data.properties.thumbnail_image,
-        email: data.kakao_account.email,
-    }
+    const profile = await getProfile(oauthConfig.KAKAO, code, state)
     console.log(profile)
     userapi.userinsertByOauth(profile, res) //로그인한 사용자에 대한 insert and update
     session.sessionGet(profile, req, res);
@@ -77,6 +77,6 @@ const getProfile = (config, code, state) => axios({
             },
             validateStatus: status => status == 200,
         })
-    }).then(res => res.data)
+    }).then(res => config.profileParser(res.data))
 
 module.exports = router;

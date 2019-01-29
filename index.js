@@ -31,7 +31,7 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true })
 //login
     //session
 app.use(session({
-    name : 'OctopusyFantasy',
+    name : 'OctopusFantasy',
     secret : 'encryptionPrivateKey',
     resave : true,
     saveUninitialized : true,
@@ -48,9 +48,6 @@ app.use(helmet.hidePoweredBy({setTo : 'YouCantSeeMe'}))
 app.use(cors());
 
 app.use('/post', require('./route/post'));
-app.use('/naverapi', require('./route/naverapi'));
-app.use('/kakaoapi', require('./route/kakaoapi'));
-app.use('/comment', require('./route/comment'));
 app.use('/mahjong', require('./route/mahjong'));
 app.use('/oauth', require('./route/oauth'))
 app.use('/user', require('./route/user'));
