@@ -1,26 +1,22 @@
 const router = require('express').Router();
 const User = require('../models/user');
 
-const userapi = require('../api/userapi')
+router.get('/', (req, res) => {
+    User.getAllUser()
+    .then(user => res.send(user))
+    .catch(err => res.status(500).send(err));
+});
 
-/*
-user CRUD
+router.get('/:id', (req, res) => {
+    User.getUserById(req.params.id)
+    .then(user => res.send(user))
+    .catch(err => res.status(500).send(err));
+});
 
-GET /user
-GET /user/:id
-POST /user
-PUT /user
-/DELETE /user/:id
-*/
-
-router.get('/', userapi.usergetAll);
-
-router.get('/:id', userapi.usergetbyid);
-
-router.post('/', userapi.userinsert)
-//만들어는 두겠지만 user update가 필요한지는 의문
-router.put('/:id', userapi.userupdatebyid);
-
-router.delete('/:id', userapi.userdelete);
+router.delete('/:id', (req, res) => {
+    User.userDelete(req.params.id)
+    .then(user => res.send(user))
+    .catch(err => res.status(500).send(err));
+});
 
 module.exports = router;
