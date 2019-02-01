@@ -1,9 +1,6 @@
 const router = require('express').Router();
 const axios = require('axios');
 
-const userapi = require('../api/userapi');
-const session = require('../api/loginapi');
-
 const oauthConfig = {
     NAVER: {
         URL_TOKEN: 'https://nid.naver.com/oauth2.0/token',
@@ -31,30 +28,10 @@ const oauthConfig = {
     },
 }
 
-router.get('/naver', async (req, res) => {
-    const { code, state } = req.query
-    const profile = await getProfile(oauthConfig.NAVER, code, state)
-    console.log("id in cookie : ", req.cookies.sessionId);
-    console.log("id in session : ", req.session.id);
-    if(req.cookies.sessionId != req.session.id) { //세션 없음
-        console.log("i will make you");
-        session.sessionGet(profile, req, res);//세션 제공
-    }
-    res.redirect(state)
-
-})
-
-/* 
-router.get('/kakao', async (req, res) => {
-    const { code, state } = req.query
-    const profile = await getProfile(oauthConfig.KAKAO, code, state)
-    console.log(profile)
-    userapi.userinsertByOauth(profile, res) //로그인한 사용자에 대한 insert and update
-    session.sessionGet(profile, req, res);
-    res.redirect(state)
-}) */
-
-const getProfile = (config, code, state) => axios({
+router.get('/signin', (req, res) => {
+    const { provider, code, state } = req.query
+    const config = oauthConfig[provider]
+    return axios({
         method: 'GET',
         url: config.URL_TOKEN,
         params: {
@@ -65,8 +42,8 @@ const getProfile = (config, code, state) => axios({
             'state': encodeURIComponent(state),
         },
         validateStatus: status => status == 200,
-    }).then(res => {
-        const accessToken = res.data.access_token
+    }).then(({ data }) => {
+        const accessToken = data.access_token
         return axios({
             method: 'GET',
             url: config.URL_PROFILE,
@@ -76,6 +53,38 @@ const getProfile = (config, code, state) => axios({
             },
             validateStatus: status => status == 200,
         })
-    }).then(res => config.profileParser(res.data))
+    }).then(({ data }) => {
+        const profile = config.profileParser(data)
+        req.session.user = profile
+        req.session.save(err => {
+            if(err) {
+                console.error(err)
+                res.status(500).send(err)
+            }
+            else {
+                console.log(req.session.user.nickname + " get signed in")
+                res.send(req.session.user)
+            }
+        })
+    })
+})
+
+router.get('/profile', (req, res) => {
+    if(req.session.user) {
+        console.log(req.session.user.nickname + " is signed in now")
+        res.status(200).send(req.session.user)
+    } else {
+        console.log("Unauthorized user")
+        res.sendStatus(401)
+    }
+})
+
+router.get('/signout', (req, res) => {
+    console.log(req.session.user.nickname + " has signed out")
+    req.session.destroy(err => {
+        if(err) res.status(500).send(err)
+        else res.sendStatus(200)
+    })
+})
 
 module.exports = router;
