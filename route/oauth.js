@@ -1,6 +1,5 @@
-const router = require('express').Router()
-const axios = require('axios')
-const User = require('../models/User')
+const router = require('express').Router();
+const axios = require('axios');
 
 const oauthConfig = {
     NAVER: {
@@ -32,7 +31,7 @@ const oauthConfig = {
 router.get('/signin', (req, res) => {
     const { provider, code, state } = req.query
     const config = oauthConfig[provider]
-    axios({
+    return axios({
         method: 'GET',
         url: config.URL_TOKEN,
         params: {
@@ -56,29 +55,36 @@ router.get('/signin', (req, res) => {
         })
     }).then(({ data }) => {
         const profile = config.profileParser(data)
-        User.updateUser(profile)
         req.session.user = profile
         req.session.save(err => {
-            if(err) res.status(500).send(err)
-            else res.send(req.session.user)
+            if(err) {
+                console.error(err)
+                res.status(500).send(err)
+            }
+            else {
+                console.log(req.session.user.nickname + " get signed in")
+                res.send(req.session.user)
+            }
         })
-        console.log(req.session.user.nickname + " signed in")
-    }).catch(err => {
-        res.status(400).send(err)
     })
 })
 
 router.get('/profile', (req, res) => {
-    if(req.session.user) res.status(200).send(req.session.user)
-    else res.sendStatus(204) // There is no user in session
+    if(req.session.user) {
+        console.log(req.session.user.nickname + " is signed in now")
+        res.status(200).send(req.session.user)
+    } else {
+        console.log("Unauthorized user")
+        res.sendStatus(401)
+    }
 })
 
 router.get('/signout', (req, res) => {
+    console.log(req.session.user.nickname + " has signed out")
     req.session.destroy(err => {
         if(err) res.status(500).send(err)
         else res.sendStatus(200)
     })
-    console.log(req.session.user.nickname + " signed out")
 })
 
 module.exports = router;
