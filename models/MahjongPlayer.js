@@ -24,16 +24,27 @@ MahjongPlayerSchema.statics.getPlayerById = function(id) {
     return this.find({ 'id': id })
 }
 
-MahjongPlayerSchema.statics.applyGameResultPlayer = function(rate, rank) {
+MahjongPlayerSchema.statics.editBattleName = function(id, battleName) {
     return this.findOneAndUpdate(
-        { id: profile.id },
-        profile,
-        { upsert: true }
+        { 'id': id },
+        { 'battleName': battleName }
+    )
+}
+
+MahjongPlayerSchema.statics.applyGameResultToPlayer = function(id, rank, rateChanged) {
+    return this.findOneAndUpdate(
+        { 'id': id },
+        {
+            $inc: rank===1 ? { 'wins.0': 1, 'rate': rateChanged }
+                : rank===2 ? { 'wins.1': 1, 'rate': rateChanged }
+                : rank===3 ? { 'wins.2': 1, 'rate': rateChanged }
+                : rank===4 ? { 'wins.3': 1, 'rate': rateChanged } : null,
+        },
     )
 }
 
 MahjongPlayerSchema.statics.deletePlayer = function(id) {
-    return this.findByIdAndDelete(id)
+    return this.findOneAndDelete({ 'id': id })
 }
 
 module.exports = mongoose.model('mahjong-player', MahjongPlayerSchema)

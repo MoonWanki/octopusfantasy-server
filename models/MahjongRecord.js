@@ -7,7 +7,7 @@ const MahjongRecord = new mongoose.Schema({
     'players': [{
         'id': String,
         'score': Number, // 최종 점수.
-        'rank': Number, // 최종 순위. 0(1위) | 1(2위) | 2(3위) | 3(4위)
+        'rank': Number, // 최종 순위.
         'rateChanged': Number, // 레이트 등락.
     }],
     // 11~19 만수패, 21~29 (통수패), 31~39(삭수패), 41~47(동·남·서·북·백·발·중)
