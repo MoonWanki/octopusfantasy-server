@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const User = require('../models/user');
+const User = require('../models/User');
 
 router.get('/', (req, res) => {
     User.getAllUser()
@@ -14,7 +14,7 @@ router.get('/:id', (req, res) => {
 });
 
 router.delete('/:id', (req, res) => {
-    User.userDelete(req.params.id)
+    User.deleteUser(req.params.id)
     .then(user => res.send(user))
     .catch(err => res.status(500).send(err));
 });

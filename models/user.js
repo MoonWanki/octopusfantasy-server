@@ -12,19 +12,19 @@ UserSchema.statics.getAllUsers = () => {
 }
 
 UserSchema.statics.getUserById = function(id) {
-    return this.find({'id' : id})
+    return this.find({ 'id': id })
 }
 
-UserSchema.statics.userUpdate = function(profile, req, res) {
-    this.findOneAndUpdate(
-        {id : profile.id},
+UserSchema.statics.updateUser = function(profile) {
+    return this.findOneAndUpdate(
+        { id: profile.id },
         profile,
-        {upsert : true}
+        { upsert: true }
     )
 }
 
-UserSchema.statics.userDelete = function(id) {
-    this.findByIdAndDelete(id)
+UserSchema.statics.deleteUser = function(id) {
+    return this.findByIdAndDelete(id)
 }
 
 module.exports = mongoose.model('user', UserSchema);

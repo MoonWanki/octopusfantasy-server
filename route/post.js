@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const Post = require('../models/post');
+const Post = require('../models/Post');
 
 router.get('/', (req, res) => {
     const { type } = req.query
