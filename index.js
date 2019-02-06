@@ -2,6 +2,8 @@ require('dotenv').config()
 
 // module definition
 const express = require('express')
+const http = require('http')
+const socketIO = require('socket.io')
 const session = require('express-session')
 const bodyParser = require('body-parser')
 const mongoose = require('mongoose')
@@ -11,6 +13,8 @@ const helmet = require('helmet')
 
 // module
 const app = express()
+const server = http.createServer(app)
+const io = socketIO(server)
 const port = process.env.PORT || 4500
 
 //static add
@@ -53,4 +57,6 @@ app.use('/mahjong', require('./route/mahjong'))
 app.use('/oauth', require('./route/oauth'))
 app.use('/user', require('./route/user'))
 
-app.listen(port, () => console.log(`Server listening on port ${port}`))
+require('./socket')(io)
+
+server.listen(port, () => console.log(`Server listening on port ${port}`))

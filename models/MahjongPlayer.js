@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const MahjongPlayerSchema = new mongoose.Schema({
     'id': String,
     'battleName': String,
-    'rate': String,
+    'rate': Number,
     'wins': [Number] // [1위 횟수, 2위 횟수, 3위 횟수, 4위 횟수]
 })
 

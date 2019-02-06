@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const MahjongRecord = new mongoose.Schema({
+const MahjongRecordSchema = new mongoose.Schema({
     'startTime': Date,
     'endTime': Date,
     'mode': Number, // 0(동풍전) | 1(반장전) | ...
@@ -10,7 +10,7 @@ const MahjongRecord = new mongoose.Schema({
         'rank': Number, // 최종 순위.
         'rateChanged': Number, // 레이트 등락.
     }],
-    // 11~19 만수패, 21~29 (통수패), 31~39(삭수패), 41~47(동·남·서·북·백·발·중)
+    // 11~19(만수패), 21~29(통수패), 31~39(삭수패), 41~47(동·남·서·북·백·발·중)
     'rotations': [{
         'round': Number, // 0(동1국) | 1(동2국) | ... | 6(남3국) | 7(남4국) | 8(서1국) | ...
         'counter': Number, // 본장. ex) (동1국일 경우) 0(동1국), 1(동1국 1본장), ...
@@ -30,29 +30,30 @@ const MahjongRecord = new mongoose.Schema({
             'yakus': [String], // (화료 시 유효) 만족시킨 역 명칭 리스트. 도라 개수 포함. ex) ["혼일색", "더블 동", "도라3"] (판수 내림차순, 도라 개수는 맨 뒤)
             'han': Number, // (화료 시 유효) 판수. 13 이상일 경우 13으로 고정. 더블 역만일 경우 26 고정.
             'fu': Number, // (화료 시 유효) 부수.
-            'winScore': Number, // (화료 시 유효) 획득 점수. (판수·부수로 계산된 기본 점수 + 본장 보너스 점수)
-            'playerResult': [{
-                'scoreChanged': Number, // 이전 점수 대비 등락
-                'score': Number, // 등락 적용 후 점수
-            }],
+            'score': Number, // (화료 시 유효) 획득 점수. (판수·부수로 계산된 기본 점수 + 본장 보너스 점수)
+            
         },
+        'players': [{
+            'scoreChanged': Number, // 이전 점수 대비 등락
+            'score': Number, // 등락 적용 후 점수
+        }],
     }],
 })
 
-MahjongRecord.statics.getAllRecords = function() {
+MahjongRecordSchema.statics.getAllRecords = function() {
     return this.find({})
 }
 
-MahjongRecord.statics.getRecordById = function(id) {
+MahjongRecordSchema.statics.getRecordById = function(id) {
     return this.find({ '_id': id })
 }
 
-MahjongRecord.statics.getRecordsByPlayerId = function(id) {
+MahjongRecordSchema.statics.getRecordsByPlayerId = function(id) {
     return this.find({ 'players.id': id })
 }
 
-MahjongRecord.statics.addRecord = function(record) {
+MahjongRecordSchema.statics.addRecord = function(record) {
     return new this(record).save()
 }
 
-module.exports = mongoose.model('mahjong-record', MahjongRecord);
+module.exports = mongoose.model('mahjong-record', MahjongRecordSchema);
