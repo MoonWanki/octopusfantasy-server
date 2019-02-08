@@ -7,8 +7,8 @@ const MahjongRecord = require('../models/MahjongRecord')
 router.post('/player', (req, res) => {
     if(req.session.user) {
         const { id } = req.session.user
-        const { battleName } = req.body
-        MahjongPlayer.createPlayer(id, battleName)
+        const { nickname } = req.body
+        MahjongPlayer.createPlayer(id, nickname)
         .then(player => res.send(player))
         .catch(err => res.status(500).send(err))
     } else {
@@ -23,11 +23,11 @@ router.get('/player/:id', (req, res) => {
     .catch(err => res.status(500).send(err))
 })
 
-router.put('/player/battlename', (req, res) => {
+router.put('/player/nickname', (req, res) => {
     if(req.session.user) {
         const { id } = req.session.user
-        const { battleName } = req.body
-        MahjongPlayer.editBattleName(id, battleName)
+        const { nickname } = req.body
+        MahjongPlayer.editNickname(id, nickname)
         .then(player => res.send(player))
         .catch(err => res.status(500).send(err))
     } else {

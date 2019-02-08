@@ -3,16 +3,16 @@ const mongoose = require('mongoose');
 const MahjongRecordSchema = new mongoose.Schema({
     'startTime': Date,
     'endTime': Date,
-    'mode': Number, // 0(동풍전) | 1(반장전) | ...
+    'mode': Number, // 1(동풍전) | 2(반장전) | ...
     'players': [{
         'id': String,
         'score': Number, // 최종 점수.
         'rank': Number, // 최종 순위.
         'rateChanged': Number, // 레이트 등락.
     }],
-    // 11~19(만수패), 21~29(통수패), 31~39(삭수패), 41~47(동·남·서·북·백·발·중)
+    // 11~19(만수패), 21~29(통수패), 31~39(삭수패), 41~44(동·남·서·북), 51~53(백·발·중)
     'rotations': [{
-        'round': Number, // 0(동1국) | 1(동2국) | ... | 6(남3국) | 7(남4국) | 8(서1국) | ...
+        'round': Number, // 1(동1국) | 2(동2국) | ... | 7(남3국) | 8(남4국) | 9(서1국) | ...
         'counter': Number, // 본장. ex) (동1국일 경우) 0(동1국), 1(동1국 1본장), ...
         'riichi': Number, // 리치봉 개수.
         'dora': [Number], // 도라(기본 1개, 깡 발생 시 추가). ex) [31, 19] (1삭·9만이 도라. 발생 순서에 따름.)

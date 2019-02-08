@@ -2,15 +2,15 @@ const mongoose = require('mongoose');
 
 const MahjongPlayerSchema = new mongoose.Schema({
     'id': String,
-    'battleName': String,
+    'nickname': String,
     'rate': Number,
     'wins': [Number] // [1위 횟수, 2위 횟수, 3위 횟수, 4위 횟수]
 })
 
-MahjongPlayerSchema.statics.createPlayer = function(id, battleName) {
+MahjongPlayerSchema.statics.createPlayer = function(id, nickname) {
     return new this({
         'id': id,
-        'battleName': battleName,
+        'nickname': nickname,
         'rate': 1500,
         'wins': [0, 0, 0, 0],
     }).save()
@@ -24,10 +24,10 @@ MahjongPlayerSchema.statics.getPlayerById = function(id) {
     return this.find({ 'id': id })
 }
 
-MahjongPlayerSchema.statics.editBattleName = function(id, battleName) {
+MahjongPlayerSchema.statics.editNickname = function(id, nickname) {
     return this.findOneAndUpdate(
         { 'id': id },
-        { 'battleName': battleName }
+        { 'nickname': nickname }
     )
 }
 

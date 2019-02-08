@@ -2,10 +2,10 @@
   "name": "octopusfantasy-server",
   "version": "1.0.0",
   "description": "REST API server for Octopus Fantasy",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node index.js",
-    "watch": "nodemon index.js"
+    "start": "node server.js",
+    "watch": "nodemon server.js"
   },
   "author": "MoonWanki",
   "license": "ISC",

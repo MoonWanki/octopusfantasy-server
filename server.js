@@ -63,6 +63,6 @@ io.use((socket, next) => {
     session(socket.request, socket.request.res, next)
 })
 
-require('./socket')(io)
+require('./sio')(io)
 
 server.listen(port, () => console.log(`Server listening on port ${port}`))
