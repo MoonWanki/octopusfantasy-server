@@ -45,7 +45,7 @@ MahjongRecordSchema.statics.getAllRecords = function() {
 }
 
 MahjongRecordSchema.statics.getRecordById = function(id) {
-    return this.find({ '_id': id })
+    return this.findOne({ '_id': id })
 }
 
 MahjongRecordSchema.statics.getRecordsByPlayerId = function(id) {

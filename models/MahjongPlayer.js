@@ -21,7 +21,7 @@ MahjongPlayerSchema.statics.getAllPlayers = function() {
 }
 
 MahjongPlayerSchema.statics.getPlayerById = function(id) {
-    return this.find({ 'id': id })
+    return this.findOne({ 'id': id })
 }
 
 MahjongPlayerSchema.statics.editNickname = function(id, nickname) {
