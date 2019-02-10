@@ -2,10 +2,6 @@ const Tile = require('./Tile')
 
 class Game {
 
-    // players : Array<Player>      player instances
-    // mode : Number                1(東風戰) | 2(半荘戰)
-    // withRedDora : Boolean        whether this game takes red dora
-
     constructor(room, players, mode) {
         this.room = room
         this.players = players

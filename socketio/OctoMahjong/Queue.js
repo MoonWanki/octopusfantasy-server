@@ -1,6 +1,6 @@
 const Room = require('./Room')
 
-const MATCH_ACCEPTANCE_TIMEOUT = 10000
+const MATCH_ACCEPTANCE_TIMEOUT = 8000
 
 class Queue {
 
@@ -38,9 +38,10 @@ class Queue {
         matchedPlayers.forEach(player => {
             player.socket.join(roomId, err => {
                 if(!err) {
+                    player.socket.removeAllListeners('enter_queue')
+                    player.socket.removeAllListeners('leave_queue')
                     player.socket.emit('match_found', matchedPlayers.map(player => player.nickname)) // notify to players
-                    player.socket.on('accept_match', () => this.onPlayerAcceptMatch(player))
-                    player.socket.on('decline_match', () => this.onPlayerDeclineMatch(player))
+                    player.socket.on('accept_match', isAccepted => this.onPlayerAcceptMatch(player, isAccepted))
                     matchedRoom.insert(player)
                 }
                 else {
@@ -50,23 +51,14 @@ class Queue {
             })
         })
 
-        matchedRoom.selfDestroyTimer = setTimeout(() => matchedRoom.selfDestroy(), MATCH_ACCEPTANCE_TIMEOUT)
+        matchedRoom.selfDestroyTimer = setTimeout(() => matchedRoom.selfDestroyOnMatchingFailed(), MATCH_ACCEPTANCE_TIMEOUT)
         console.warn('Match will be declined unless all players accept this match in 10 SECONDS!')
     }
 
-    onPlayerAcceptMatch(player) {
-        console.log(`${player.nickname} accepted match! waiting for others...`)
+    onPlayerAcceptMatch(player, isAccepted) { // accepted or declined
+        console.log(`${player.nickname} ${isAccepted ? 'accepted!' : 'declined.'} waiting for ${isAccepted ? 'others...' : 'room shut down...'}`)
         player.socket.removeAllListeners('accept_match')
-        player.socket.removeAllListeners('decline_match')
-        player.roomIn.onPlayerReady(player) // force player to be ready
-    }
-
-    onPlayerDeclineMatch(player) {
-        console.log(`${player.nickname} declined match. waiting for room shut down...`)
-        player.socket.removeAllListeners('accept_match')
-        player.socket.removeAllListeners('decline_match')
-        player.roomIn.onPlayerLeave(player) // force player to leave room
-        this.mahjong.onPlayerLeaveQueue(player) // leave queue
+        if(isAccepted) player.roomIn.onPlayerReady(player) // force player to be ready
     }
 
 }

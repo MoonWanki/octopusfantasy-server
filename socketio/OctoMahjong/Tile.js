@@ -3,9 +3,10 @@ class Tile {
     constructor(type, number, isHonour, isRedDora) {
         this.type = type
         this.number = number
-        this.isHonour = isHonour || false
+        this.isHonour = isHonour
+        this.isRedDora = isRedDora
+
         this.isDora = false
-        this.isRedDora = isRedDora || false
         this.isUraDora = false
     }
 

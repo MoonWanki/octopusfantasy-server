@@ -33,20 +33,14 @@ class Room {
     }
 
     onPlayerLeave(player) {
-        player.socket.leave(this.id, err => {
+        player.socket.leave(this.id, err => { // when successfully left
             if(!err) {
-                player.socket.removeAllListeners(['ready', 'cancel_ready', 'leave'])
+                player.roomIn = null
+                player.isReady = false
+                player.socket.removeAllListeners('ready')
+                player.socket.removeAllListeners('cancel_ready')
+                player.socket.removeAllListeners('leave')
                 this.remove(player)
-                if(player.queueIn) {
-                    if(player.isReady) {
-                        player.socket.emit('match_declined')
-                        player.queueIn.insert(player)
-                    }
-                    else {
-                        player.socket.emit('match_declined')
-                        player.queueIn.onPlayerDeclineMatch(player)
-                    }
-                }
             }
             else {
                 console.error(err)
@@ -74,26 +68,34 @@ class Room {
     }
 
     startGame() {
-        if(this.selfDestroyTimer) {
-            clearTimeout(this.selfDestroyTimer)
-            this.selfDestroyTimer = null
-        }
         if(!this.game) {
-            console.log(`Game started in room ${this.id}!`)
-            const game = new Game(this, this.players, this.mode)
-            this.game = game
-
+            if(this.selfDestroyTimer) {
+                clearTimeout(this.selfDestroyTimer)
+                this.selfDestroyTimer = null
+            }
             this.players.forEach(player => {
-                player.queueIn = null
+                if(player.queueIn) {
+                    player.queueIn = null
+                    player.socket.removeAllListeners('leave_queue')
+                    player.socket.emit('match_success')
+                }
                 player.socket.emit('game_started')
             })
+            const game = new Game(this, this.players, this.mode)
+            this.game = game
+            console.log(`Game started in room ${this.id}!`)
         }
     }
 
-    selfDestroy() {
-        console.log(`room ${this.id} destroyed.`)
+    // if this room is created by queue but somebody has not accepted
+    selfDestroyOnMatchingFailed() {
+        console.log(`room ${this.id} destroyed due to match failure`)
         this.players.forEach(player => {
+            player.socket.emit('match_failed')
             this.onPlayerLeave(player)
+
+            if(player.isReady) this.mahjong.onPlayerEnterQueue(player, this.mode)
+            else this.mahjong.onPlayerLeaveQueue(player, this.mode)
         })
     }
     

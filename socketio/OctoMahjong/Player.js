@@ -13,6 +13,9 @@ class Player {
         this.roomIn = null // room where player is joined
 
         this.isReady = false
+
+        this.didRiichi = false
+        this.isClosed = true
     }
 }
 
