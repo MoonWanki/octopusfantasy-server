@@ -17,9 +17,9 @@ class Room {
         if(this.players.length < this.mode.capacity) {
             player.roomIn = this
             this.players.push(player)
-            console.log(`${player.nickname} joined room ${this.id}. now in room${this.id}: ${this.players.map(p => p.nickname)}`)
+            this.notifyRoomStatus()
+            console.log(`${player.info.nickname} joined room ${this.id}. now in room${this.id}: ${this.players.map(p => p.info.nickname)}`)
 
-            this.mahjong.nsp.to(this.id).emit('room_status', this.players.map(player => player.nickname))
             player.socket.on('ready', () => this.onPlayerReady(player))
             player.socket.on('leave', () => onPlayerLeave(player))
         }
@@ -28,8 +28,6 @@ class Room {
     remove(player) {
         const idx = this.players.findIndex(p => p == player)
         if(idx != -1) this.players.splice(idx, 1)
-        this.mahjong.nsp.to(this.id).emit('room_status', this.players.map(p => p.nickname))
-        console.log(`${player.nickname} left room ${this.id}. now in room${this.id}: ${this.players.map(p => p.nickname)}`)
     }
 
     onPlayerLeave(player) {
@@ -41,6 +39,9 @@ class Room {
                 player.socket.removeAllListeners('cancel_ready')
                 player.socket.removeAllListeners('leave')
                 this.remove(player)
+                this.notifyRoomStatus()
+                this.mahjong.notifyConnectedPlayers()
+                console.log(`${player.info.nickname} left room ${this.id}. now in room${this.id}: ${this.players.map(p => p.info.nickname)}`)
             }
             else {
                 console.error(err)
@@ -52,8 +53,8 @@ class Room {
     onPlayerReady(player) {
         this.readyCount++
         player.isReady = true
+        this.notifyRoomStatus()
         player.socket.on('cancel_ready', () => this.onPlayerCancelReady(player))
-        this.mahjong.nsp.to(this.id).emit('room_status', this.players.map(p => p.nickname))
         
         if(this.readyCount == this.mode.capacity) {
             this.startGame()
@@ -63,8 +64,12 @@ class Room {
     onPlayerCancelReady(player) {
         this.readyCount--
         player.isReady = false
+        this.notifyRoomStatus()
         player.socket.on('ready', () => this.onPlayerReady(player))
-        this.mahjong.nsp.to(this.id).emit('room_status', this.players.map(p => p.nickname))
+    }
+
+    notifyRoomStatus() {
+        this.mahjong.nsp.to(this.id).emit('room_status', this.players.map(p => ({ info: p.info, isReady: p.isReady })))
     }
 
     startGame() {
@@ -83,19 +88,23 @@ class Room {
             })
             const game = new Game(this, this.players, this.mode)
             this.game = game
+            this.mahjong.notifyConnectedPlayers()
             console.log(`Game started in room ${this.id}!`)
         }
     }
 
     // if this room is created by queue but somebody has not accepted
-    selfDestroyOnMatchingFailed() {
+    selfDestroyByMatchingFailed() {
         console.log(`room ${this.id} destroyed due to match failure`)
         this.players.forEach(player => {
             player.socket.emit('match_failed')
             this.onPlayerLeave(player)
 
-            if(player.isReady) this.mahjong.onPlayerEnterQueue(player, this.mode)
-            else this.mahjong.onPlayerLeaveQueue(player, this.mode)
+            if(player.isReady) this.mahjong.onPlayerEnterQueue(player, this.mode) // insert to queue again automatically
+            else {
+                player.queueIn.onPlayerDeclineMatch(player)
+                this.mahjong.onPlayerLeaveQueue(player, this.mode)
+            }
         })
     }
     

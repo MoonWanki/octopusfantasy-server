@@ -14,15 +14,12 @@ class Mahjong {
     }
 
     joinPlayer(player) {
-        console.log(player.nickname, " joined mahjong.")
+        console.log(`${player.info.nickname} joined mahjong. welcome!`)
         player.socket.on('disconnect', reason => this.onPlayerDisconnect(player, reason))
         player.socket.on('enter_queue', mode => this.onPlayerEnterQueue(player, mode))
-        player.socket.emit('my_info', {
-            nickname: player.nickname,
-            rate: player.rate,
-            wins: player.wins,
-        })
+
         this.players.push(player) // join
+        this.notifyConnectedPlayers()
     }
 
     onPlayerEnterQueue(player, mode) { // when player start finding match
@@ -35,6 +32,8 @@ class Mahjong {
         else if(capacity == 4 && wind == 2) this.queue_4p_hanchan.insert(player)
         else if(capacity == 3 && wind == 1) this.queue_3p_tonpuusen.insert(player)
         else if(capacity == 3 && wind == 2) this.queue_3p_hanchan.insert(player)
+
+        this.notifyConnectedPlayers()
     }
 
     onPlayerLeaveQueue(player) { // when player cancel finding match
@@ -42,18 +41,23 @@ class Mahjong {
         player.queueIn.remove(player)
         player.queueIn = null
         player.socket.on('enter_queue', mode => this.onPlayerEnterQueue(player, mode))
+        this.notifyConnectedPlayers()
     }
 
     onPlayerDisconnect(player, reason) {
-        console.log(player.nickname, " left mahjong.")
+        console.log(`${player.info.nickname} left mahjong. good bye!`)
         if(player.roomIn) player.roomIn.remove(player)
         if(player.queueIn) player.queueIn.remove(player)
 
         // remove player from mahjong
         const idx = this.players.findIndex(p => p == player)
         if(idx != -1) this.players.splice(idx, 1)
+        this.notifyConnectedPlayers()
     }
 
+    notifyConnectedPlayers() {
+        this.nsp.emit('connected_players', this.players.map(p => ({ info: p.info, isInQueue: Boolean(p.queueIn), isInRoom: Boolean(p.roomIn) })))
+    }
 }
 
 module.exports = Mahjong

@@ -14,7 +14,7 @@ class Queue {
     insert(player) {
         player.queueIn = this
         this.queue.push(player)
-        console.log(`${player.nickname} inserted in queue. now in queue: ${this.queue.map(p => p.nickname)}`)
+        console.log(`${player.info.nickname} inserted in queue. now in queue: ${this.queue.map(p => p.info.nickname)}`)
 
         if(this.queue.length >= this.mode.capacity) {
             const matchedPlayers = this.queue.splice(0, this.mode.capacity) // dequeue matched players
@@ -26,12 +26,12 @@ class Queue {
         const idx = this.queue.findIndex(p => p == player)
         if(idx != -1) {
             this.queue.splice(idx, 1)
-            console.log(`${player.nickname} removed from queue. now in queue: ${this.queue.map(p => p.nickname)}`)
+            console.log(`${player.info.nickname} removed from queue. now in queue: ${this.queue.map(p => p.info.nickname)}`)
         }
     }
 
     onMatchFound(matchedPlayers) {
-        console.log("match found", matchedPlayers.map(p => p.nickname))
+        console.log("match found", matchedPlayers.map(p => p.info.nickname))
         const roomId = this.mahjong.roomIdCounter++ // generate room id
         const matchedRoom = new Room(this.mahjong, roomId, this.mode)
 
@@ -40,8 +40,9 @@ class Queue {
                 if(!err) {
                     player.socket.removeAllListeners('enter_queue')
                     player.socket.removeAllListeners('leave_queue')
-                    player.socket.emit('match_found', matchedPlayers.map(player => player.nickname)) // notify to players
-                    player.socket.on('accept_match', isAccepted => this.onPlayerAcceptMatch(player, isAccepted))
+                    player.socket.emit('match_found', matchedPlayers.map(player => player.info)) // notify to players
+                    player.socket.on('accept_match', () => this.onPlayerAcceptMatch(player))
+                    player.socket.on('decline_match', () => this.onPlayerDeclineMatch(player))
                     matchedRoom.insert(player)
                 }
                 else {
@@ -51,14 +52,21 @@ class Queue {
             })
         })
 
-        matchedRoom.selfDestroyTimer = setTimeout(() => matchedRoom.selfDestroyOnMatchingFailed(), MATCH_ACCEPTANCE_TIMEOUT)
-        console.warn('Match will be declined unless all players accept this match in 10 SECONDS!')
+        matchedRoom.selfDestroyTimer = setTimeout(() => matchedRoom.selfDestroyByMatchingFailed(), MATCH_ACCEPTANCE_TIMEOUT)
+        console.warn('Match will be declined unless all players accept in 10 SECONDS!')
     }
 
-    onPlayerAcceptMatch(player, isAccepted) { // accepted or declined
-        console.log(`${player.nickname} ${isAccepted ? 'accepted!' : 'declined.'} waiting for ${isAccepted ? 'others...' : 'room shut down...'}`)
+    onPlayerAcceptMatch(player) { // accepted
+        console.log(`${player.info.nickname} ACCEPTED. waiting for others...`)
         player.socket.removeAllListeners('accept_match')
-        if(isAccepted) player.roomIn.onPlayerReady(player) // force player to be ready
+        player.socket.removeAllListeners('decline_match')
+        player.roomIn.onPlayerReady(player) // force player to be ready
+    }
+
+    onPlayerDeclineMatch(player) { // declined
+        console.log(`${player.info.nickname} DECLINED. waiting for room shut down...`)
+        player.socket.removeAllListeners('accept_match')
+        player.socket.removeAllListeners('decline_match')
     }
 
 }
