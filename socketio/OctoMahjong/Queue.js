@@ -33,7 +33,7 @@ class Queue {
     onMatchFound(matchedPlayers) {
         console.log("match found", matchedPlayers.map(p => p.info.nickname))
         const roomId = this.mahjong.roomIdCounter++ // generate room id
-        const matchedRoom = new Room(this.mahjong, roomId, this.mode)
+        const matchedRoom = new Room(this.mahjong, roomId, this.mode, false)
 
         matchedPlayers.forEach(player => {
             player.socket.join(roomId, err => {

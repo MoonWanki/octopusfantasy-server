@@ -2,7 +2,7 @@ const Game = require('./Game')
 
 class Room {
 
-    constructor(mahjong, id, mode) {
+    constructor(mahjong, id, mode, isCustom) {
         this.mahjong = mahjong
         this.id = id
         this.players = new Array()
@@ -11,6 +11,8 @@ class Room {
         this.game = null
         this.readyCount = 0
         this.selfDestroyTimer = null
+
+        this.isCustom = isCustom
     }
 
     insert(player) {
@@ -91,6 +93,10 @@ class Room {
             this.mahjong.notifyConnectedPlayers()
             console.log(`Game started in room ${this.id}!`)
         }
+    }
+
+    onGameFinished() {
+        this.game = null
     }
 
     // if this room is created by queue but somebody has not accepted
