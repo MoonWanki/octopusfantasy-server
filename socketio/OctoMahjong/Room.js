@@ -75,24 +75,25 @@ class Room {
     }
 
     startGame() {
-        if(!this.game) {
-            if(this.selfDestroyTimer) {
-                clearTimeout(this.selfDestroyTimer)
-                this.selfDestroyTimer = null
-            }
-            this.players.forEach(player => {
-                if(player.queueIn) {
-                    player.queueIn = null
-                    player.socket.removeAllListeners('leave_queue')
-                    player.socket.emit('match_success')
-                }
-                player.socket.emit('game_started')
-            })
-            const game = new Game(this, this.players, this.mode)
-            this.game = game
-            this.mahjong.notifyConnectedPlayers()
-            console.log(`Game started in room ${this.id}!`)
+        if(this.selfDestroyTimer) {
+            clearTimeout(this.selfDestroyTimer)
+            this.selfDestroyTimer = null
         }
+        this.players.forEach(player => {
+            if(player.queueIn) {
+                player.queueIn = null
+                player.socket.removeAllListeners('leave_queue')
+                player.socket.emit('match_success')
+            }
+            player.socket.emit('game_started')
+        })
+
+        this.game = new Game(this, this.players, this.mode)
+        this.game.initGame()
+        this.game.startRotation()
+
+        this.mahjong.notifyConnectedPlayers()
+        console.log(`Game started in room ${this.id}!`)
     }
 
     onGameFinished() {
