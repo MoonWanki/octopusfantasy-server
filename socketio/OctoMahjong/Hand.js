@@ -19,7 +19,7 @@ class Hand {
             if(idx != -1) this.closed[idx] = this.tsumoTile
             this.tsumoTile = null
         }
-    }
+    } //여기 수정하세요
     
     isClosed() {
         return this.opened.length == 0

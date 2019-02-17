@@ -46,7 +46,7 @@ class Rotation {
         if(winnableTiles.length) { // if tenpai
             if(winnableTiles.find(t => t==tsumoTile)) { // if tsumo tile is one of winnable tiles
                 player.on('tsumo_agari', () => this.onPlayerTsumoAgari(player)) // 2) Tsumo agari
-            }
+            }// 여기 수정해주세요
             else if(player.hand.isClosed && !player.didRiichi) {
                 // check if riichi is available
                 const allTilesInHand = player.hand.closed.concat(this.tsumoTile)
