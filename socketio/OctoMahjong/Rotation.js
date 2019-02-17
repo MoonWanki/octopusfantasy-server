@@ -36,25 +36,41 @@ class Rotation {
         const player = this.players[this.turn]
         const tsumoTile = this.tiles[this.tileCount++]
         player.hand.tsumo(tsumoTile)
-        player.emit('tsumo_tile', tsumoTile)
         this.players.forEach(p => p.emit('did_tsumo', this.turn))
+        player.emit('tsumo_tile', tsumoTile)
 
         // find possible choices
-        player.on('giri', giriTile => this.onPlayerGiri(player, giriTile))
-        const winnableTiles = player.hand.isTenpai()
+        player.on('giri', giriTile => this.onPlayerGiri(player, giriTile)) // 1) Giri
+
+        const winnableTiles = player.hand.isTenpai() // returns winnable tiles if tenpai
         if(winnableTiles.length) { // if tenpai
-            if(player.hand.isClosed && !player.didRiichi) {
-                const giriTilesToRiichi = player.hand.canRiichi()
+            if(winnableTiles.find(t => t==tsumoTile)) { // if tsumo tile is one of winnable tiles
+                player.on('tsumo_agari', () => this.onPlayerTsumoAgari(player)) // 2) Tsumo agari
+            }
+            else if(player.hand.isClosed && !player.didRiichi) {
+                // check if riichi is available
+                const allTilesInHand = player.hand.closed.concat(this.tsumoTile)
+                let giriTilesToRiichi = new Array()
+                for(let i=0 ; i<tiles.length ; i++) {
+                    const spliced = allTilesInHand.splice(i, 1)
+                    const winnableTiles = player.hand.isTenpai(spliced)
+                    if(winnableTiles.length) giriTilesToRiichi.push(tiles[i])
+                }
                 if(giriTilesToRiichi.length) {
-                    player.emit('can_riichi', giriTilesToRiichi)
+                    player.emit('can_riichi', giriTilesToRiichi) // 3) Riichi
                     player.on('riichi', () => this.onPlayerRiichi(player, giriTile))
                 }
             }
         }
+        // TODO: 4) Ankan if ankou exists
+        // TODO: 5) Shouminkan if minkou exists
     }
 
+    // players choice 1: Giri
     onPlayerGiri(player, giriTile) {
         player.removeAllListeners('giri')
+        player.removeAllListeners('riichi')
+        player.removeAllListeners('tsumo_agari')
         this.players.forEach(p => p.emit('did_giri', this.turn, giriTile))
 
         // TODO: handle if anybody can chi or pong or ron
@@ -68,8 +84,48 @@ class Rotation {
         }
     }
 
+    // player's choice 2: Riichi
     onPlayerRiichi(player, giriTile) {
+        player.removeAllListeners('giri')
+        player.removeAllListeners('riichi')
+        player.removeAllListeners('tsumo_agari')
+    }
 
+    // player's choice 3: Tsumo agari
+    onPlayerTsumoAgari(player, giriTile) {
+        player.removeAllListeners('giri')
+        player.removeAllListeners('riichi')
+        player.removeAllListeners('tsumo_agari')
+    }
+
+    // player's choice 4: Ankan
+    onPlayerAnkan(player) {
+
+    }
+
+    // player's choice 5: Shouminkan
+    onPlayerShouminkan(player) {
+
+    }
+
+    // other's choice 1: Ron agari
+    onOtherPlayerRonAgari(player) {
+        // TODO: handle ron agari
+    }
+
+    // other's choice 2: Pong
+    onOtherPlayerPong(player) {
+        // TODO: handle pong
+    }
+
+    // other's choice 3: Chii
+    onOtherPlayerChii(player) {
+        // TODO: handle chii
+    }
+
+    // other's choice 4: Daiminkan
+    onOtherPlayerDaiminkan(player) {
+        // TODO: handle daiminkan
     }
 
     initTiles() {

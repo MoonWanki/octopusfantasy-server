@@ -32,23 +32,6 @@ class Hand {
 
         return null // winnable tiles or empty array
     }
-
-    // return whether riichi is available with all tiles on hand(14p)
-    canRiichi() {
-        if(this.isClosed && !this.player.didRiichi) {
-            let giriTilesToRiichi = new Array()
-            const tiles = this.closed.concat(this.tsumoTile)
-            // check for every case
-            for(let i=0 ; i<tiles.length ; i++) {
-                const spliced = tiles.splice(i, 1)
-                const winnableTiles = this.isTenpai(spliced)
-                if(winnableTiles.length) {
-                    giriTilesToRiichi.push(tiles[i])
-                }
-            }
-            return giriTilesToRiichi
-        } else return null
-    }
 }
 
 module.exports = Hand
