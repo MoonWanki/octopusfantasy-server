@@ -14,12 +14,15 @@ class Hand {
     }
 
     giri(tile) {
+        let allClosedTiles = this.closed
         if(this.tsumoTile) {
-            const idx = this.closed.findIndex(t => t==tile)
-            if(idx != -1) this.closed[idx] = this.tsumoTile
+            allClosedTiles = allClosedTiles.concat(this.tsumoTile)
             this.tsumoTile = null
         }
-    } //여기 수정하세요 쯔모한거 버릴수도 있어요
+        const idx = allClosedTiles.findIndex(t => t==tile)
+        if(idx != -1) allClosedTiles.splice(idx, 1)
+        this.closed = allClosedTiles
+    }
     
     isClosed() {
         return this.opened.length == 0

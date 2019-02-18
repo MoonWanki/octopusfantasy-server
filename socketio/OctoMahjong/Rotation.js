@@ -37,33 +37,43 @@ class Rotation {
         const tsumoTile = this.tiles[this.tileCount++]
         player.hand.tsumo(tsumoTile)
         this.players.forEach(p => p.emit('did_tsumo', this.turn))
-        player.emit('tsumo_tile', tsumoTile)
+
+        let canTsumoAgari, canRiichi, canAnkan, canShouminkan
 
         // find possible choices
-        player.on('giri', giriTile => this.onPlayerGiri(player, giriTile)) // 1) Giri
 
         const winnableTiles = player.hand.isTenpai() // returns winnable tiles if tenpai
-        if(winnableTiles.length) { // if tenpai
-            if(winnableTiles.find(t => t==tsumoTile)) { // if tsumo tile is one of winnable tiles
-                player.on('tsumo_agari', () => this.onPlayerTsumoAgari(player)) // 2) Tsumo agari
-            }// 여기 수정해주세요
-            else if(player.hand.isClosed && !player.didRiichi) {
-                // check if riichi is available
-                const allTilesInHand = player.hand.closed.concat(this.tsumoTile)
-                let giriTilesToRiichi = new Array()
-                for(let i=0 ; i<tiles.length ; i++) {
-                    const spliced = allTilesInHand.splice(i, 1)
-                    const winnableTiles = player.hand.isTenpai(spliced)
-                    if(winnableTiles.length) giriTilesToRiichi.push(tiles[i])
-                }
-                if(giriTilesToRiichi.length) {
-                    player.emit('can_riichi', giriTilesToRiichi) // 3) Riichi
-                    player.on('riichi', () => this.onPlayerRiichi(player, giriTile))
-                }
+
+        // 1) Giri - default
+
+        // 2) Tsumo agari - if tenpai && tsumo tile is winnable tile
+        if(winnableTiles.length && winnableTiles.find(t => t==tsumoTile)) {
+            canTsumoAgari = true
+        }
+        // 3) Riichi - if tenpai can be made by tsumo tile
+        else if(player.hand.isClosed && !player.didRiichi) {
+            const allTilesInHand = player.hand.closed.concat(this.tsumoTile)
+            let giriTilesToRiichi = new Array()
+            for(let i=0 ; i<tiles.length ; i++) {
+                const spliced = allTilesInHand.splice(i, 1)
+                const winnableTiles = player.hand.isTenpai(spliced)
+                if(winnableTiles.length) giriTilesToRiichi.push(tiles[i])
+            }
+            if(giriTilesToRiichi.length) {
+                canRiichi = true
             }
         }
-        // TODO: 4) Ankan if ankou exists
-        // TODO: 5) Shouminkan if minkou exists
+
+        // TODO: 4) Ankan - if ankou exists
+        // TODO: 5) Shouminkan - if minkou exists
+
+        player.on('giri', giriTile => this.onPlayerGiri(player, giriTile))                  // 1) Giri
+        if(canTsumoAgari) player.on('tsumo_agari', () => this.onPlayerTsumoAgari(player))   // 2) Tsumo agari
+        if(canRiichi) player.on('riichi', () => this.onPlayerRiichi(player))                // 3) Riichi
+        if(canAnkan) player.on('ankan', () => this.onPlayerAnkan(player))                   // 4) Ankan
+        if(canShouminkan) player.on('shouminkan', () => this.onPlayerShouminkan(player))    // 5) Shouminkan
+
+        player.emit('tsumo_tile', tsumoTile, { canTsumoAgari, canRiichi, canAnkan, canShouminkan }) // give availble choices (Giri is default)
     }
 
     // players choice 1: Giri
