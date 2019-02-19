@@ -957,11 +957,20 @@ input = [
 expected = [ new Tile(1, 2), new Tile(1, 3), new Tile(1, 4), new Tile(1, 5), new Tile(1, 8) ]
 assert('5-39', input, expected)
 
-// Final. 구련보등 9면 대기
+// Extra. 순정구련보등
 input = [
     new Tile(1, 1), new Tile(1, 1), new Tile(1, 1), new Tile(1, 2), new Tile(1, 3),
     new Tile(1, 4), new Tile(1, 5), new Tile(1, 6), new Tile(1, 7), new Tile(1, 8),
     new Tile(1, 9), new Tile(1, 9), new Tile(1, 9)
 ]
 expected = [ new Tile(1, 1), new Tile(1, 2), new Tile(1, 3), new Tile(1, 4), new Tile(1, 5), new Tile(1, 6), new Tile(1, 7), new Tile(1, 8), new Tile(1, 9) ]
-assert('Final', input, expected)
+assert('Extra', input, expected)
+
+// Extra. 국사무쌍 13면 대기
+input = [
+    new Tile(1, 1), new Tile(1, 9), new Tile(2, 1), new Tile(2, 9), new Tile(3, 1),
+    new Tile(3, 9), new Tile(4, 1), new Tile(4, 2), new Tile(4, 3), new Tile(4, 4),
+    new Tile(5, 1), new Tile(5, 2), new Tile(5, 3)
+]
+expected = [ new Tile(1, 1), new Tile(1, 9), new Tile(2, 1), new Tile(2, 9), new Tile(3, 1), new Tile(3, 9), new Tile(4, 1), new Tile(4, 2), new Tile(4, 3), new Tile(4, 4), new Tile(5, 1), new Tile(5, 2), new Tile(5, 3) ]
+assert('Extra', input, expected)
