@@ -39,8 +39,6 @@ isRyanTatsu = (a, b) => {
         return []
     if(a.type == b.type && a.number + 1 == b.number) {
         tmp = [new Tile(a.type, a.number-1), new Tile(a.type, b.number+1)]
-        console.log("ryan", a.type, a.number, "||", b.type, b.number)
-        console.log(tmp)
         return tmp
     }
     return []
@@ -49,8 +47,6 @@ isRyanTatsu = (a, b) => {
 isKanTatsu = (a, b) => {
     if(a.type == b.type && a.number + 2 == b.number) {
         tmp = [ new Tile(a.type, a.number+1) ]
-        console.log("kan", a.type, a.number, "||", b.type, b.number)
-        console.log(tmp)
         return tmp
     }
     return []
@@ -61,14 +57,10 @@ isPenTatsu = (a, b) => {
         // Neither is true
         if(a.isHonour){
             tmp = [ new Tile(b.type, b.number+1) ]
-            console.log("pen", a.type, a.number, "||", b.type, b.number)
-        console.log(tmp)
             return tmp
         }
         if(b.isHonour) {
             tmp = [ new Tile(a.type, a.number-1) ]
-            console.log("pen", a.type, a.number, "||", b.type, b.number)
-        console.log(tmp)
             return tmp
         }
     }
@@ -78,8 +70,6 @@ isPenTatsu = (a, b) => {
 isAnker = (a, b) => {
     if(a.type == b.type && a.number == b.number) {
         tmp = [ new Tile(a.type, a.number) ]
-        console.log("anker", a.type, a.number, "||", b.type, b.number)
-        console.log(tmp)
         return tmp
     }
     return []
