@@ -12,7 +12,7 @@ UserSchema.statics.getAllUsers = () => {
 }
 
 UserSchema.statics.getUserById = function(id) {
-    return this.find({ 'id': id })
+    return this.find({ id })
 }
 
 UserSchema.statics.updateUser = function(profile) {

@@ -27,7 +27,7 @@ const PostSchema = new mongoose.Schema({
 })
 
 PostSchema.statics.getPostById = function(id) {
-    return this.findOne({ 'id': id })
+    return this.findOne({ id })
 }
 
 PostSchema.statics.getPostsByType = function(type) {

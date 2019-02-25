@@ -4,7 +4,7 @@ const Post = require('../models/Post');
 router.get('/', (req, res) => {
     const { type } = req.query
     if(type) {
-        Post.getPostsByType(Number(type))
+        Post.getPostsByType(type)
         .then(posts => res.send(posts))
         .catch(err => res.status(500).send(err))
     }
@@ -20,7 +20,7 @@ router.get('/:pid', (req, res) => {
     Post.getPostById(pid)
     .then(post => res.send(post))
     .catch(err => res.status(500).send(err));
-});
+})
 
 /* --------------- LIKE --------------- */
 
