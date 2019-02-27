@@ -24,7 +24,7 @@ Cross-platform online mahjong game via SocketIO.
 - **Express** | https://expressjs.com  
 Fast, unopinionated, minimalist web framework.  
 
-- **``Socket.IO``** | https://socket.io  
+- **Socket<span>.</span>IO** | https://socket.io  
 Provides real-time, bi-directional communication between web clients and server.  
 
 - **Mongoose** | https://mongoosejs.com  

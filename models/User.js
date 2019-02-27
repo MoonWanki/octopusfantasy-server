@@ -15,7 +15,7 @@ UserSchema.statics.getUserById = function(id) {
     return this.find({ id })
 }
 
-UserSchema.statics.updateUser = function(profile) {
+UserSchema.statics.upsertUser = function(profile) {
     return this.findOneAndUpdate(
         { id: profile.id },
         profile,

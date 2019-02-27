@@ -32,6 +32,7 @@ const oauthConfig = {
 router.get('/signin', (req, res) => {
     const { provider, code, state } = req.query
     const config = oauthConfig[provider]
+    let profile
     axios({
         method: 'GET',
         url: config.URL_TOKEN,
@@ -55,15 +56,19 @@ router.get('/signin', (req, res) => {
             validateStatus: status => status == 200,
         })
     }).then(({ data }) => {
-        const profile = config.profileParser(data)
-        User.updateUser(profile)
+        profile = config.profileParser(data)
+        return User.upsertUser(profile)
+    }).then(() => {
         req.session.user = profile
         req.session.save(err => {
             if(err) res.status(500).send(err)
-            else res.send(req.session.user)
+            else {
+                console.log(req.session.user.nickname + " signed in")
+                res.send(req.session.user)
+            }
         })
-        console.log(req.session.user.nickname + " signed in")
     }).catch(err => {
+        console.error(err)
         res.status(400).send(err)
     })
 })
