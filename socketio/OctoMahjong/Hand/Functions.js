@@ -14,8 +14,28 @@ exports.Convert = input => {
     return tiles
 }
 
+exports.Revert = input => {
+    let type = 0, number = 0
+    if(input < 27) {
+        type = 1 + parseInt(input / 9)
+        number = 1 + (input % 9)
+        return [type, number]
+    }
+    else {
+        if(input < 31) {
+            type = 4
+            number = input - 26
+            return [type, number]
+        } else {
+            type = 5
+            number = input - 30
+            return [type, number]
+        }
+    }
+}
+
 exports.Sorting = input => {
-    const sorted = tiles.sort(function(a, b) {
+    const sorted = input.sort(function(a, b) {
         if(a.type == b.type) {
             if(a.number >= b.number)
                 return 1
@@ -30,7 +50,7 @@ exports.Sorting = input => {
 exports.FindPairs = input => {
     let pairs = new Array()
     for(let i = 0; i < input.length; i++) {
-        if(x > 26 && input[i] != 2)
+        if(i > 26 && input[i] != 2)
             continue
         
         if(input[i] >= 2) {
@@ -40,19 +60,14 @@ exports.FindPairs = input => {
     return pairs
 }
 
-exports.ValidCheck = function(input, first, last) {
-    // man : first = 0 | last = 8
-    // pin : first = 9 | last = 17
-    // sou : first = 18 | last = 26
-    let hand = new Array()
-    for(let i = first; i <= last; i++) {
-        if(input[i] > 0) {
-            for(let j = 0; j < input[i]; j++) {
-                hand.push(i)
-            }
-        }
+exports.ValidCheck = (input, firstIndex) => {
+    let hand = []
+    for(let num of input) {
+        for(let i = 0; i < num; i++)
+            hand.push(firstIndex)
+        firstIndex++
     }
-    if(!hand)
+    if(hand.length < 3)
         return []
     let AllCombination = perm.amn(hand, 3)
     let ValidComb = []
@@ -61,15 +76,42 @@ exports.ValidCheck = function(input, first, last) {
             ValidComb.push(comb)
         }
     })
-    if(!ValidComb)
+    if(ValidComb.length === 0)
         return []
-    const ExpectedCombNumber = parseInt(hand.length / 3)
-    
-    // simple case
-    if(ExpectedCombNumber == ValidComb.length)
-        return ValidComb
-    else
-        return []
+    ValidComb.sort()
+    let Unique = []
+    Unique.push(ValidComb[0])
+    // unique
+    for(let i = 1, k = 0; i < ValidComb.length;) {
+        if(JSON.stringify(Unique[k]) != JSON.stringify(ValidComb[i])) {
+            Unique.push(ValidComb[i])
+            i++;k++
+        }i++
+    }
+    let Result = []
+    for(let comb of Unique) {
+        for(let i = 0; i < 4; i++) {
+            Result.push(comb)
+        }
+    }
+    //console.log(Result)
+    return Result
+}
+
+exports.UniqueCheck = (tiles, input) => {
+    let AllParts = perm.amn(input, 4)
+    for(let part of AllParts) {
+        //console.log(part)
+        let tmp = new Array(tiles.length).fill(0)
+        for(let body of part) {
+            for(let i of body)
+                tmp[i]++
+        }
+        if(JSON.stringify(tmp) == JSON.stringify(tiles)) {
+            return true
+        }
+    }
+    return false
 }
 
 FindBody = set => {
@@ -83,11 +125,13 @@ FindBody = set => {
 isChi = function(set) {
     if(set.length != 3)
         return false
-    return set[0] == set[1] - 1 == set[2] - 2
+    if(set[0] == set[1] - 1 && set[1] - 1 == set[2] - 2) {
+        return true
+    }
 }
 
 isPon = function(set) {
     if(set.length != 3)
         return false
-    return set[0] == set[1] == set[2]
+    return set[0] == set[1] && set[1] == set[2]
 }
