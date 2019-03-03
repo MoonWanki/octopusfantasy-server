@@ -43,7 +43,7 @@ module.exports.isTenpai = function(tiles) {
         const Header = func.findPairs(t)
 
         //Thirteen orphan process
-        if(guksa && Header.length < 2) {
+        if(guksa && meldNum == 4) {
             winningTile = func.guksa(GuksaHeader, Header, t)
             return winningTile
         }
