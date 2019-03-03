@@ -1,7 +1,7 @@
 const perm = require('math-permutation')
 const Tile = require('../Tile')
 
-exports.Convert = input => {
+exports.convertTile = input => {
     let tiles = new Array()
     for(let i = 0; i < 34; i++) { tiles.push(0) }
     input.forEach(tile => {
@@ -15,7 +15,7 @@ exports.Convert = input => {
     return tiles
 }
 
-exports.Revert = input => {
+exports.revertTile = input => {
     let type = 0, number = 0
     if(input < 27) {
         type = 1 + parseInt(input / 9)
@@ -35,7 +35,7 @@ exports.Revert = input => {
     }
 }
 
-exports.Sorting = input => {
+exports.sorting = input => {
     const sorted = input.sort(function(a, b) {
         if(a.type == b.type) {
             if(a.number >= b.number)
@@ -48,7 +48,7 @@ exports.Sorting = input => {
     return sorted
 }
 
-exports.FindPairs = input => {
+exports.findPairs = input => {
     let pairs = new Array()
     for(let i = 0; i < input.length; i++) {
         if(i > 26 && input[i] != 2)
@@ -61,7 +61,7 @@ exports.FindPairs = input => {
     return pairs
 }
 
-exports.Guksa = (GuksaHeader, Header, tiles) => {
+exports.guksa = (GuksaHeader, Header, tiles) => {
     ex = [
         new Tile(1, 1), new Tile(1, 9), new Tile(2, 1), new Tile(2, 9), new Tile(3, 1),
         new Tile(3, 9), new Tile(4, 1), new Tile(4, 2), new Tile(4, 3), new Tile(4, 4),
@@ -71,10 +71,10 @@ exports.Guksa = (GuksaHeader, Header, tiles) => {
         return ex
     }
     if(Header.length > 0) { // 1 tile return
-        let tmp = exports.Convert(exports.Sorting(ex))
+        let tmp = exports.convertTile(exports.sorting(ex))
         for(let i = 0; i < tmp.length; i++) {
             if(tmp[i] != 0 && tiles[i] === 0) {
-                const tile = exports.Revert(i)
+                const tile = exports.revertTile(i)
                 return [new Tile(tile[0], tile[1])]
             }
         }

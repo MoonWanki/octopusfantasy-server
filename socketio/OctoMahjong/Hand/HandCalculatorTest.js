@@ -1,5 +1,5 @@
 const Tile = require('../Tile')
-const isTenpai = require('./HandCalculator').isTenpai
+const isTenpai = require('./handCalculator').isTenpai
 // const isTenpai = () => []
 
 let input, expected
@@ -20,9 +20,7 @@ const assert = (flag, input, expected) => {
 
 // 1-1. 단기
 input = [
-    new Tile(1, 1), new Tile(3, 1), new Tile(3, 1), new Tile(3, 1), new Tile(3, 1),
-    new Tile(3, 2), new Tile(3, 3), new Tile(3, 7), new Tile(3, 7), new Tile(3, 8),
-    new Tile(3, 8), new Tile(3, 9), new Tile(3, 9)
+    new Tile(1, 1)
 ]
 expected = [ new Tile(1, 1) ]
 assert('1-1', input, expected)
@@ -65,9 +63,7 @@ assert('1-5', input, expected)
 
 // 2-1. 양면
 input = [
-    new Tile(1, 2), new Tile(1, 3), new Tile(3, 1), new Tile(3, 1), new Tile(3, 1),
-    new Tile(3, 2), new Tile(3, 3), new Tile(3, 7), new Tile(3, 7), new Tile(3, 8),
-    new Tile(3, 8), new Tile(3, 9), new Tile(3, 9)
+    new Tile(1, 2), new Tile(1, 3), new Tile(3, 1), new Tile(3, 1)
 ]
 expected = [ new Tile(1, 1), new Tile(1, 4) ]
 assert('2-1', input, expected)
@@ -129,8 +125,7 @@ assert('3-1', input, expected)
 // 3-2. 단기 + 단기 + 단기
 input = [
     new Tile(1, 1), new Tile(1, 2), new Tile(1, 3), new Tile(1, 4), new Tile(1, 5),
-    new Tile(1, 6), new Tile(1, 7), new Tile(2, 7), new Tile(2, 7), new Tile(2, 8),
-    new Tile(2, 8), new Tile(2, 9), new Tile(2, 9)
+    new Tile(1, 6), new Tile(1, 7)
 ]
 expected = [ new Tile(1, 1), new Tile(1, 4), new Tile(1, 7) ]
 assert('3-2', input, expected)
@@ -174,8 +169,7 @@ assert('3-6', input, expected)
 // 3-7. 간짱 + 단기 + 단기
 input = [
     new Tile(1, 1), new Tile(1, 1), new Tile(1, 1), new Tile(1, 3), new Tile(1, 4),
-    new Tile(1, 5), new Tile(1, 6), new Tile(2, 7), new Tile(2, 7), new Tile(2, 8),
-    new Tile(2, 8), new Tile(2, 9), new Tile(2, 9)
+    new Tile(1, 5), new Tile(1, 6)
 ]
 expected = [ new Tile(1, 2), new Tile(1, 3), new Tile(1, 6) ]
 assert('3-7', input, expected)
@@ -381,8 +375,7 @@ assert('4-10', input, expected)
 // 4-11. 양면 + 양면 + 간짱
 input = [
     new Tile(1, 2), new Tile(1, 2), new Tile(1, 2), new Tile(1, 2), new Tile(1, 3),
-    new Tile(1, 4), new Tile(1, 4), new Tile(1, 4), new Tile(1, 5), new Tile(1, 6),
-    new Tile(3, 7), new Tile(3, 8), new Tile(3, 9)
+    new Tile(1, 4), new Tile(1, 4), new Tile(1, 4), new Tile(1, 5), new Tile(1, 6)
 ]
 expected = [ new Tile(1, 1), new Tile(1, 3), new Tile(1, 4), new Tile(1, 7) ]
 assert('4-11', input, expected)

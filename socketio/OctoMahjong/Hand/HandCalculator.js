@@ -1,10 +1,17 @@
 const Tile = require('../Tile')
-const Func = require('./Functions')
+const func = require('./functions')
 
 module.exports.isTenpai = function(tiles) {
-    let arrays = new Array()
-    var WinningTile = new Array()
+    var winningTile = new Array()
     var result = new Array()
+    var meldNum = 0
+
+    if(tiles.length == 1)
+        return tiles
+    else {
+        meldNum = (tiles.length - 1)/3
+    }
+
     //Thirteen orphan check
     let Guksa = false
     if(!tiles.some(tile => {
@@ -15,10 +22,10 @@ module.exports.isTenpai = function(tiles) {
     }
     
     //sorting and Convert to array (length = 34)
-    tiles = Func.Convert(Func.Sorting(tiles))
+    tiles = func.convertTile(func.sorting(tiles))
 
     // Header find for Thirteen orphan
-    var GuksaHeader = Func.FindPairs(tiles)
+    var GuksaHeader = func.findPairs(tiles)
 
     //하나씩 넣어보기
     for(let i = 0; i < tiles.length; i++) {
@@ -30,17 +37,17 @@ module.exports.isTenpai = function(tiles) {
         t[i] += 1
 
         // header candidate extract
-        const Header = Func.FindPairs(t)
+        const Header = func.findPairs(t)
         //Thirteen orphan process
         if(Guksa) {
-            WinningTile = Func.Guksa(GuksaHeader, Header, t)
-            return WinningTile
+            winningTile = func.guksa(GuksaHeader, Header, t)
+            return winningTile
         }
 
         // Chitoitsu check
         if(Header.length > 6) {
-            const tile = Func.Revert(i)
-            WinningTile.push(new Tile(tile[0], tile[1]))
+            const tile = func.revertTile(i)
+            winningTile.push(new Tile(tile[0], tile[1]))
             break
         }
         Header.forEach(pair => {
@@ -73,20 +80,20 @@ module.exports.isTenpai = function(tiles) {
                     j++
                 }
             }
-            if(meld.length === 4) {
+            if(meld.length === meldNum) {
                 let flag = true
-                const tile = Func.Revert(i)
-                for(let i = 0; i < WinningTile.length; i++) {
-                    if(JSON.stringify(WinningTile[i]) == JSON.stringify(new Tile(tile[0], tile[1]))) {
+                const tile = func.revertTile(i)
+                for(let i = 0; i < winningTile.length; i++) {
+                    if(JSON.stringify(winningTile[i]) == JSON.stringify(new Tile(tile[0], tile[1]))) {
                         flag = false
                         break
                     }
                 }
                 if(flag) {
-                    WinningTile.push(new Tile(tile[0], tile[1]))
+                    winningTile.push(new Tile(tile[0], tile[1]))
                 }
             }
         })
     }
-    return WinningTile
+    return winningTile
 }
