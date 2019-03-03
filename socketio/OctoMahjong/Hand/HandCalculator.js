@@ -20,6 +20,15 @@ module.exports.isTenpai = function(tiles) {
         // header candidate extract
         const Header = Func.FindPairs(t)
 
+        // Chitoitsu check
+        if(Header.length > 5) {
+            if(Header.length === 6)
+                continue
+            const tile = Func.Revert(i)
+            WinningTile.push(new Tile(tile[0], tile[1]))
+            break
+        }
+
         Header.forEach(pair => {
             let LocalTiles = t.slice()
             /* remove open-tile in here */
