@@ -6,6 +6,7 @@ module.exports.isTenpai = function(tiles) {
     var result = new Array()
     var meldNum = 0
 
+    // tiles length check to modify meldNum value
     if(tiles.length == 1)
         return tiles
     else {
@@ -13,12 +14,12 @@ module.exports.isTenpai = function(tiles) {
     }
 
     //Thirteen orphan check
-    let Guksa = false
+    let guksa = false
     if(!tiles.some(tile => {
         if(!tile.isHonour)
             return true
     })) {
-        Guksa = true
+        guksa = true
     }
     
     //sorting and Convert to array (length = 34)
@@ -27,19 +28,22 @@ module.exports.isTenpai = function(tiles) {
     // Header find for Thirteen orphan
     var GuksaHeader = func.findPairs(tiles)
 
-    //하나씩 넣어보기
+    //Input each tile at a time
     for(let i = 0; i < tiles.length; i++) {
         let t = tiles.slice()
 
+        // except condition to prevent unnecessary input
         if(t[i] > 3 || t[i] == 0 && ((i+1 < t.length && t[i+1] == 0) && (i > 0 && t[i-1] == 0)))
             continue
+        
         // element insert to check Tenpai
         t[i] += 1
 
         // header candidate extract
         const Header = func.findPairs(t)
+
         //Thirteen orphan process
-        if(Guksa) {
+        if(guksa && Header.length < 2) {
             winningTile = func.guksa(GuksaHeader, Header, t)
             return winningTile
         }
@@ -50,10 +54,11 @@ module.exports.isTenpai = function(tiles) {
             winningTile.push(new Tile(tile[0], tile[1]))
             break
         }
+
+        // pop each header at a time
         Header.forEach(pair => {
             let LocalTiles = t.slice()
             let meld = []
-            /* remove open-tile in here */
             LocalTiles[pair] -= 2
 
             // body elimination
@@ -64,12 +69,13 @@ module.exports.isTenpai = function(tiles) {
                     meld.push([j,j,j])
                     LocalTiles[j] -= 3
                 }
+                // condition for preventing loop from crossing the border
                 if(parseInt(j/9) != parseInt((j+1)/9) || parseInt(j/9) != parseInt((j+2)/9)) {
                     j++
                     continue
                 }
+                // chi elimination
                 if(j < 25 && (LocalTiles[j] > 0) && (LocalTiles[j+1] >= LocalTiles[j]) && (LocalTiles[j+2] >= LocalTiles[j])) {
-                    // chi elimination
                     meld.push([j, j+1, j+2])
                     LocalTiles[j] -= 1
                     LocalTiles[j+1] -= 1
@@ -80,6 +86,7 @@ module.exports.isTenpai = function(tiles) {
                     j++
                 }
             }
+            // meld length check and uniquely insert
             if(meld.length === meldNum) {
                 let flag = true
                 const tile = func.revertTile(i)

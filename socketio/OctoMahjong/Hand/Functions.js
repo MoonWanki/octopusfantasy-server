@@ -70,7 +70,7 @@ exports.guksa = (GuksaHeader, Header, tiles) => {
     if(GuksaHeader.length === 0) { // 13 tile return
         return ex
     }
-    if(Header.length > 0) { // 1 tile return
+    if(Header.length == 1) { // 1 tile return
         let tmp = exports.convertTile(exports.sorting(ex))
         for(let i = 0; i < tmp.length; i++) {
             if(tmp[i] != 0 && tiles[i] === 0) {
