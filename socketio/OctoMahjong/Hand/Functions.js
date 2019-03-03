@@ -61,69 +61,16 @@ exports.FindPairs = input => {
     return pairs
 }
 
-exports.ValidCheck = (input, firstIndex) => {
-    let hand = []
-    for(let num of input) {
-        for(let i = 0; i < num; i++)
-            hand.push(firstIndex)
-        firstIndex++
-    }
-    if(hand.length < 3)
-        return []
-    let AllCombination = perm.amn(hand, 3)
-    let ValidComb = []
-    AllCombination.forEach(comb => {
-        if(FindBody(comb)) {
-            ValidComb.push(comb)
-        }
-    })
-    if(ValidComb.length === 0)
-        return []
-    ValidComb.sort()
-    let Unique = []
-    Unique.push(ValidComb[0])
-    // unique
-    for(let i = 1, k = 0; i < ValidComb.length;) {
-        if(JSON.stringify(Unique[k]) != JSON.stringify(ValidComb[i])) {
-            Unique.push(ValidComb[i])
-            i++;k++
-        }i++
-    }
-    let Result = []
-    for(let comb of Unique) {
-        for(let i = 0; i < 4; i++) {
-            Result.push(comb)
-        }
-    }
-    //console.log(Result)
-    return Result
-}
-
-exports.UniqueCheck = (tiles, input) => {
-    let AllParts = perm.amn(input, 4)
-    for(let part of AllParts) {
-        //console.log(part)
-        let tmp = new Array(tiles.length).fill(0)
-        for(let body of part) {
-            for(let i of body)
-                tmp[i]++
-        }
-        if(JSON.stringify(tmp) == JSON.stringify(tiles)) {
-            return true
-        }
-    }
-    return false
-}
-
-exports.Guksa = (Header, tiles) => {
+exports.Guksa = (GuksaHeader, Header, tiles) => {
     ex = [
         new Tile(1, 1), new Tile(1, 9), new Tile(2, 1), new Tile(2, 9), new Tile(3, 1),
         new Tile(3, 9), new Tile(4, 1), new Tile(4, 2), new Tile(4, 3), new Tile(4, 4),
         new Tile(5, 1), new Tile(5, 2), new Tile(5, 3)
     ]
-    if(Header.length === 0) { // 13 tile return
+    if(GuksaHeader.length === 0) { // 13 tile return
         return ex
-    } else { // 1 tile return
+    }
+    if(Header.length > 0) { // 1 tile return
         let tmp = exports.Convert(exports.Sorting(ex))
         for(let i = 0; i < tmp.length; i++) {
             if(tmp[i] != 0 && tiles[i] === 0) {
@@ -133,26 +80,4 @@ exports.Guksa = (Header, tiles) => {
         }
         return []
     }
-}
-
-FindBody = set => {
-    if(isChi(set))
-        return true
-    if(isPon(set))
-        return true
-    return false
-}
-
-isChi = function(set) {
-    if(set.length != 3)
-        return false
-    if(set[0] == set[1] - 1 && set[1] - 1 == set[2] - 2) {
-        return true
-    }
-}
-
-isPon = function(set) {
-    if(set.length != 3)
-        return false
-    return set[0] == set[1] && set[1] == set[2]
 }
