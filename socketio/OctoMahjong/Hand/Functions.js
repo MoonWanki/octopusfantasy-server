@@ -1,4 +1,5 @@
 const perm = require('math-permutation')
+const Tile = require('../Tile')
 
 exports.Convert = input => {
     let tiles = new Array()
@@ -112,6 +113,26 @@ exports.UniqueCheck = (tiles, input) => {
         }
     }
     return false
+}
+
+exports.Guksa = (Header, tiles) => {
+    ex = [
+        new Tile(1, 1), new Tile(1, 9), new Tile(2, 1), new Tile(2, 9), new Tile(3, 1),
+        new Tile(3, 9), new Tile(4, 1), new Tile(4, 2), new Tile(4, 3), new Tile(4, 4),
+        new Tile(5, 1), new Tile(5, 2), new Tile(5, 3)
+    ]
+    if(Header.length === 0) { // 13 tile return
+        return ex
+    } else { // 1 tile return
+        let tmp = exports.Convert(exports.Sorting(ex))
+        for(let i = 0; i < tmp.length; i++) {
+            if(tmp[i] != 0 && tiles[i] === 0) {
+                const tile = exports.Revert(i)
+                return [new Tile(tile[0], tile[1])]
+            }
+        }
+        return []
+    }
 }
 
 FindBody = set => {

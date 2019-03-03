@@ -5,6 +5,15 @@ module.exports.isTenpai = function(tiles) {
     let arrays = new Array()
     var WinningTile = new Array()
 
+    //Thirteen orphan check
+    let Guksa = false
+    if(!tiles.some(tile => {
+        if(!tile.isHonour)
+            return true
+    })) {
+        Guksa = true
+    }
+    
     //sorting and Convert to array (length = 34)
     tiles = Func.Convert(Func.Sorting(tiles))
 
@@ -19,6 +28,12 @@ module.exports.isTenpai = function(tiles) {
 
         // header candidate extract
         const Header = Func.FindPairs(t)
+
+        //Thirteen orphan process
+        if(Guksa) {
+            WinningTile = Func.Guksa(Header, t)
+            break
+        }
 
         // Chitoitsu check
         if(Header.length > 5) {
