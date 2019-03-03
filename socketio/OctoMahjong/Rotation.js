@@ -1,4 +1,5 @@
 const Hand = require('./Hand')
+const Tile = require('./Tile')
 
 class Rotation {
 
