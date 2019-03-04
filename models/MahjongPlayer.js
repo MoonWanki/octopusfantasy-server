@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 
 const MahjongPlayerSchema = new mongoose.Schema({
     'id': String,

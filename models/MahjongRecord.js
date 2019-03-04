@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 
 const MahjongRecordSchema = new mongoose.Schema({
     'startTime': Date,
