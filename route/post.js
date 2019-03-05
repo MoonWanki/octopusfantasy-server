@@ -63,13 +63,12 @@ router.post('/:pid/comment', (req, res) => {
     }
 })
 
-router.put('/:pid/comment', (req, res) => {
+router.put('/:pid/comment/:cid', (req, res) => {
     if(req.session.user) {
         const { id: uid } = req.session.user
-        // TODO: check if the comment is made by this user
-        const { pid } = req.params
-        const { cid, text } = req.body
-        Post.editComment(pid, cid, text)
+        const { pid, cid } = req.params
+        const { text } = req.body
+        Post.editComment(pid, uid, cid, text)
         .then(post => res.send(post))
         .catch(err => res.status(500).send(err))
     } else {
@@ -77,13 +76,51 @@ router.put('/:pid/comment', (req, res) => {
     }
 })
 
-router.delete('/:pid/comment', (req, res) => {
+router.delete('/:pid/comment/:cid', (req, res) => {
     if(req.session.user) {
         const { id: uid } = req.session.user
-        // TODO: check if the comment is made by this user
-        const { pid } = req.params
-        const { cid } = req.body
-        Post.deleteComment(pid, cid)
+        const { pid, cid } = req.params
+        Post.deleteComment(pid, uid, cid)
+        .then(post => res.send(post))
+        .catch(err => res.status(500).send(err))
+    } else {
+        res.sendStatus(401)
+    }
+})
+
+/* --------------- RECOMMENT --------------- */
+
+router.post('/:pid/comment/:cid', (req, res) => {
+    if(req.session.user) {
+        const { id: uid } = req.session.user
+        const { pid, cid } = req.params
+        const { text } = req.body
+        Post.addRecomment(pid, uid, cid, text)
+        .then(post => res.send(post))
+        .catch(err => res.status(500).send(err))
+    } else {
+        res.sendStatus(401)
+    }
+})
+
+router.put('/:pid/comment/:cid/:rcid', (req, res) => {
+    if(req.session.user) {
+        const { id: uid } = req.session.user
+        const { pid, cid, rcid } = req.params
+        const { text } = req.body
+        Post.editRecomment(pid, uid, cid, rcid, text)
+        .then(post => res.send(post))
+        .catch(err => res.status(500).send(err))
+    } else {
+        res.sendStatus(401)
+    }
+})
+
+router.delete('/:pid/comment/:cid/:rcid', (req, res) => {
+    if(req.session.user) {
+        const { id: uid } = req.session.user
+        const { pid, cid, rcid } = req.params
+        Post.deleteRecomment(pid, uid, cid, rcid)
         .then(post => res.send(post))
         .catch(err => res.status(500).send(err))
     } else {

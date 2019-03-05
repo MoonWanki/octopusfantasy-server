@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 
 const PostSchema = new mongoose.Schema({
     'id': { type: Number, required: true },
@@ -8,16 +8,14 @@ const PostSchema = new mongoose.Schema({
     'video': String,
     'contents': String,
     'comments': [{
-        '_id': mongoose.Types.ObjectId,
         'uid': String,
-        'commented-on': Date,
+        'commentedOn': Date,
         'text': String,
         'valid': Boolean,
         'modified': Boolean,
         'recomments': [{
-            '_id': mongoose.Types.ObjectId,
             'uid': String,
-            'commented-on': Date,
+            'recommentedOn': Date,
             'text': String,
             'valid': Boolean,
             'modified': Boolean,
@@ -26,12 +24,26 @@ const PostSchema = new mongoose.Schema({
     'likes': Array,
 })
 
+PostSchema.virtual('comments.commentedBy', {
+    ref: 'user',
+    localField: 'comments.uid',
+    foreignField: 'id',
+    justOne: true,
+})
+
+PostSchema.virtual('comments.recomments.recommentedBy', {
+    ref: 'user',
+    localField: 'comments.recomments.uid',
+    foreignField: 'id',
+    justOne: true,
+})
+
 PostSchema.statics.getPostById = function(id) {
-    return this.findOne({ id })
+    return this.findOne({ id }).populate('comments.commentedBy').populate('comments.recomments.recommentedBy')
 }
 
 PostSchema.statics.getPostsByType = function(type) {
-    return this.find({ type })
+    return this.find({ type }).populate('comments.commentedBy').populate('comments.recomments.recommentedBy')
 }
 
 PostSchema.statics.getAllPosts = function() {
@@ -61,9 +73,8 @@ PostSchema.statics.addComment = function(pid, uid, text) {
         { 'id': pid },
         { $push: { 
             'comments': {
-                '_id': new mongoose.Types.ObjectId(),
                 'uid': uid,
-                'commented-on': new Date(),
+                'commentedOn': new Date(),
                 'text': text,
                 'valid': true,
                 'modified': false,
@@ -73,22 +84,63 @@ PostSchema.statics.addComment = function(pid, uid, text) {
     )
 }
 
-PostSchema.statics.editComment = function(pid, cid, text) {
+PostSchema.statics.editComment = function(pid, uid, cid, text) {
+    return this.findOneAndUpdate(
+        { 'id': pid, 'comments.uid': uid, 'comments._id': cid },
+        { $set: { 
+            'comments.$[c].text': text,
+            'comments.$[c].modified': true,
+        }},
+        { 'arrayFilters': [{ 'c._id': cid }] },
+    )
+}
+
+PostSchema.statics.deleteComment = function(pid, uid, cid) {
+    console.log(pid, uid, cid)
+    return this.findOneAndUpdate(
+        { 'id': pid, 'comments.uid': uid, 'comments._id': cid },
+        { $set: { 
+            'comments.$[c].valid': false,
+        }},
+        { 'arrayFilters': [{ 'c._id': cid }] },
+    )
+}
+
+/* --------------- RECOMMENT --------------- */
+
+PostSchema.statics.addRecomment = function(pid, uid, cid, text) {
     return this.findOneAndUpdate(
         { 'id': pid, 'comments._id': cid },
-        { $set: { 
-            'comments.$.text': text,
-            'comments.$.modified': true,
+        { $push: { 
+            'comments.$.recomments': {
+                'uid': uid,
+                'recommentedOn': new Date(),
+                'text': text,
+                'valid': true,
+                'modified': false,
+            },
         }},
     )
 }
 
-PostSchema.statics.deleteComment = function(pid, cid) {
+PostSchema.statics.editRecomment = function(pid, uid, cid, rcid, text) {
     return this.findOneAndUpdate(
-        { 'id': pid, 'comments._id': cid },
-        { $set: { 
-            'comments.$.valid': false,
+        { 'id': pid, 'comments._id': cid, 'comments.recomments._id': rcid, 'comments.recomments.uid': uid },
+        { $set: {
+            'comments.$[c].recomments.$[rc].text': text,
+            'comments.$[c].recomments.$[rc].modified': true,
         }},
+        { 'arrayFilters': [{ 'c._id': cid }, { 'rc._id': rcid }] },
+    )
+}
+
+PostSchema.statics.deleteRecomment = function(pid, uid, cid, rcid) {
+    return this.findOneAndUpdate(
+        { 'id': pid, 'comments._id': cid, 'comments.recomments._id': rcid, 'comments.recomments.uid': uid },
+        { $set: {
+            'comments.$[c].recomments.$[rc].valid': false,
+        }},
+        { 'arrayFilters': [{ 'c._id': cid }, { 'rc._id': rcid }] },
     )
 }
 

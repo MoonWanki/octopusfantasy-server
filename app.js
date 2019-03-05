@@ -23,7 +23,7 @@ module.exports = session => {
     // security
     app.use(helmet.hidePoweredBy({setTo : 'YouCantSeeMe'}))
     app.use(cors({
-        origin: true,
+        origin: [/localhost/, /octopusfantasy\.com$/],
         credentials: true,
     }))
     
