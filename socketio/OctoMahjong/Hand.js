@@ -1,16 +1,44 @@
+const isTenpai = require('./utils/isTenpai')
+
 class Hand {
 
     constructor(player, tiles) {
         this.player = player
 
         this.closed = tiles
-        this.opened = []
+        this.opened = new Array()
 
         this.tsumoTile = null
+        this.giriTiles = new Array()
+        this.agariTiles = null // set only by HandCalculator.isTenpai()
+
+        this.isTenpai = false
+
+        this.checkTenpai()
     }
 
-    tsumo(tile) {
-        if(!this.tsumoTile) this.tsumoTile = tile
+    // check if this player is now tenpai with his closed hand.
+    // if yes, save his agariTiles so that no calculation is need again.
+    checkTenpai() {
+        const tenpaiInfo = isTenpai(this.closed)
+        if(tenpaiInfo.length) {
+            this.isTenpai = true
+            this.agariTiles = tenpaiInfo
+        }
+        else {
+            this.isTenpai = false
+            this.agariTiles = null
+        }
+    }
+
+    isInGiriTiles(tile) {
+        this.giriTiles.forEach(giriTile => { if(tile.isSameWith(giriTile)) return true })
+        return false
+    }
+
+    isInAgariTiles(tile) {
+        this.agariTiles.forEach(agariTiles => { if(tile.isSameWith(agariTiles)) return true })
+        return false
     }
 
     giri(tile) {
@@ -22,19 +50,11 @@ class Hand {
         const idx = allClosedTiles.findIndex(t => t==tile)
         if(idx != -1) allClosedTiles.splice(idx, 1)
         this.closed = allClosedTiles
+        this.checkTenpai()
     }
     
     isClosed() {
         return this.opened.length == 0
-    }
-
-    isTenpai(tiles) {
-        const tiles = tiles || this.closed
-
-        // TODO: find winnable tiles if tenpai.
-        // 텐파이는 그냥 단순히 머리1개, 몸통 4개 만들 수 있는지
-        // 화료는 역이 있는지
-        return null // winnable tiles or empty array
     }
 }
 

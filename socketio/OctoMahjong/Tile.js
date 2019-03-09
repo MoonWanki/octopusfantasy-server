@@ -17,6 +17,10 @@ class Tile {
     setUraDora(isUraDora) {
         this.isUraDora = isUraDora
     }
+
+    isSameWith(tile) {
+        return this.type == tile.type && this.number == tile.number
+    }
 }
 
 module.exports = Tile

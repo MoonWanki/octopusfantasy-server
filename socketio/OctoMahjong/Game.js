@@ -8,7 +8,7 @@ class Game {
         this.mode = mode
 
         this.rotation = null
-        this.round = 0
+        this.round = 1
         this.counter = 0
 
         this.deposit = 0
@@ -24,7 +24,7 @@ class Game {
 
     startRotation() {
         const wind = Math.floor((this.round-1) / this.mode.capacity) + 1
-        const round = (this.round-1) % this.mode.capacity
+        const round = (this.round-1) % this.mode.capacity + 1
         this.rotation = new Rotation(this, this.mode.capacity, wind, round, this.counter)
         this.rotation.initRotation()
         this.rotation.requestTurn()

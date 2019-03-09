@@ -1,5 +1,5 @@
 const Tile = require('../Tile')
-const isTenpai = require('./handCalculator').isTenpai
+const isTenpai = require('./isTenpai')
 // const isTenpai = () => []
 
 let input, expected

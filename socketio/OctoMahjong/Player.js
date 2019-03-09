@@ -17,8 +17,10 @@ class Player {
 
         // in rotation
         this.hand = null
+        this.wind = null
         this.isDealer = false
         this.didRiichi = false
+        this.didDoubleRiichi = false
     }
 }
 

@@ -1,5 +1,7 @@
 const Hand = require('./Hand')
 const Tile = require('./Tile')
+const isTenpai = require('./utils/isTenpai')
+const getYakus = require('./utils/getYakus')
 
 class Rotation {
 
@@ -21,6 +23,8 @@ class Rotation {
     initRotation() {
         this.initTiles()
         this.players.forEach((p, idx) => {
+            let playerWind = (idx + 1) - (this.round - 1)
+            p.wind = playerWind > 0 ? playerWind : playerWind + 4
             p.isDealer = idx == this.round-1 // true if dealer
             p.isClosed = false
             p.isTenpai = false
@@ -35,31 +39,29 @@ class Rotation {
     requestTurn() {
         // tsumo
         const player = this.players[this.turn]
+        const hand = player.hand
         const tsumoTile = this.tiles[this.tileCount++]
-        player.hand.tsumo(tsumoTile)
-        this.players.forEach(p => p.emit('did_tsumo', this.turn))
+        hand.tsumoTile = tsumoTile
 
         let canTsumoAgari, canRiichi, canAnkan, canShouminkan
 
         // find possible choices
 
-        const winnableTiles = player.hand.isTenpai() // returns winnable tiles if tenpai
-
         // 1) Giri - default
 
         // 2) Tsumo agari - if tenpai && tsumo tile is winnable tile
-        if(winnableTiles.length && winnableTiles.find(t => t==tsumoTile)) {
+        if(hand.isTenpai && hand.isInAgariTiles(tsumoTile)) {
             canTsumoAgari = true
         }
         // 3) Riichi - if tenpai can be made by tsumo tile
-        else if(player.hand.isClosed && !player.didRiichi) {
+        else if(player.hand.isClosed && !player.didRiichi && !player.didDoubleRiichi) {
             const allTilesInHand = player.hand.closed.concat(this.tsumoTile)
             let giriTilesToRiichi = new Array()
-            for(let i=0 ; i<tiles.length ; i++) {
-                const spliced = allTilesInHand.splice(i, 1)
-                const winnableTiles = player.hand.isTenpai(spliced)
-                if(winnableTiles.length) giriTilesToRiichi.push(tiles[i])
-            }
+            allTilesInHand.forEach((_, i) => {
+                const sliced = allTilesInHand.slice(i, i+1)
+                const agariTiles = isTenpai(sliced)
+                if(agariTiles.length) giriTilesToRiichi = giriTilesToRiichi.concat(agariTiles)
+            })
             if(giriTilesToRiichi.length) {
                 canRiichi = true
             }
@@ -68,21 +70,30 @@ class Rotation {
         // TODO: 4) Ankan - if ankou exists
         // TODO: 5) Shouminkan - if minkou exists
 
-        player.on('giri', giriTile => this.onPlayerGiri(player, giriTile))                  // 1) Giri
-        if(canTsumoAgari) player.on('tsumo_agari', () => this.onPlayerTsumoAgari(player))   // 2) Tsumo agari
-        if(canRiichi) player.on('riichi', () => this.onPlayerRiichi(player))                // 3) Riichi
-        if(canAnkan) player.on('ankan', () => this.onPlayerAnkan(player))                   // 4) Ankan
-        if(canShouminkan) player.on('shouminkan', () => this.onPlayerShouminkan(player))    // 5) Shouminkan
+        player.socket.on('giri', giriTile => this.onPlayerGiri(player, giriTile))                  // 1) Giri
+        if(canTsumoAgari) player.socket.on('tsumo_agari', () => this.onPlayerTsumoAgari(player))   // 2) Tsumo agari
+        if(canRiichi) player.socket.on('riichi', () => this.onPlayerRiichi(player))                // 3) Riichi
+        if(canAnkan) player.socket.on('ankan', () => this.onPlayerAnkan(player))                   // 4) Ankan
+        if(canShouminkan) player.socket.on('shouminkan', () => this.onPlayerShouminkan(player))    // 5) Shouminkan
 
-        player.emit('tsumo_tile', tsumoTile, { canTsumoAgari, canRiichi, canAnkan, canShouminkan }) // give availble choices (Giri is default)
+        // send events to client
+        player.socket.emit('tsumo_tile', tsumoTile, { canTsumoAgari, canRiichi, canAnkan, canShouminkan })
+        player.socket.broadcast.to(this.game.room.id).emit('did_tsumo', this.turn)
     }
 
-    // players choice 1: Giri
+    removePlayerChoice(player) {
+        player.socket.removeAllListeners('giri')
+        player.socket.removeAllListeners('tsumo_agari')
+        player.socket.removeAllListeners('riichi')
+        player.socket.removeAllListeners('ankan')
+        player.socket.removeAllListeners('shouminkan')
+    }
+
+    // player's choice callback 1: Giri
     onPlayerGiri(player, giriTile) {
-        player.removeAllListeners('giri')
-        player.removeAllListeners('riichi')
-        player.removeAllListeners('tsumo_agari')
-        this.players.forEach(p => p.emit('did_giri', this.turn, giriTile))
+        this.removePlayerChoice(player)
+        player.giriTiles.push(giriTile)
+        player.socket.broadcast.to(this.game.room.id).emit('did_giri', this.turn, giriTile)
 
         // TODO: handle if anybody can chi or pong or ron
 
@@ -94,47 +105,47 @@ class Rotation {
             // TODO: handle exhausted
         }
     }
+    
+    // player's choice callback 2: Tsumo agari
+    onPlayerTsumoAgari(player, agariTile) {
+        this.removePlayerChoice(player)
 
-    // player's choice 2: Riichi
+        const yakus = getYakus(this, player)
+        // TODO: handle tsumo agari
+    }
+
+    // player's choice callback 3: Riichi
     onPlayerRiichi(player, giriTile) {
-        player.removeAllListeners('giri')
-        player.removeAllListeners('riichi')
-        player.removeAllListeners('tsumo_agari')
+        this.removePlayerChoice(player)
+        // TODO: handle riichi
     }
 
-    // player's choice 3: Tsumo agari
-    onPlayerTsumoAgari(player, giriTile) {
-        player.removeAllListeners('giri')
-        player.removeAllListeners('riichi')
-        player.removeAllListeners('tsumo_agari')
-    }
-
-    // player's choice 4: Ankan
+    // player's choice callback 4: Ankan
     onPlayerAnkan(player) {
-
+        // TODO: handle ankan
     }
 
-    // player's choice 5: Shouminkan
+    // player's choice callback 5: Shouminkan
     onPlayerShouminkan(player) {
-
+        // TODO: handle shouminkan
     }
 
-    // other's choice 1: Ron agari
+    // other's choice callback 1: Ron agari
     onOtherPlayerRonAgari(player) {
         // TODO: handle ron agari
     }
 
-    // other's choice 2: Pong
+    // other's choice callback 2: Pong
     onOtherPlayerPong(player) {
         // TODO: handle pong
     }
 
-    // other's choice 3: Chii
+    // other's choice callback 3: Chii
     onOtherPlayerChii(player) {
         // TODO: handle chii
     }
 
-    // other's choice 4: Daiminkan
+    // other's choice callback 4: Daiminkan
     onOtherPlayerDaiminkan(player) {
         // TODO: handle daiminkan
     }
@@ -148,9 +159,9 @@ class Rotation {
         t1_t9.forEach(n => subTiles.push(new Tile(3, n)))
         t1_t4.forEach(n => subTiles.push(new Tile(4, n)))
         t1_t3.forEach(n => subTiles.push(new Tile(5, n)))
-        if(this.mode.capacity == 3) subTiles.splice(1, 7) // cut 2~8 MAN if 3p game
+        if(this.capacity == 3) subTiles.splice(1, 7) // cut 2~8 MAN if 3p game
         let tiles = subTiles.concat(subTiles).concat(subTiles)
-        if(this.mode.capacity == 3) {
+        if(this.capacity == 3) {
             subTiles[6] = new Tile(2, 5, true)
             subTiles[15] = new Tile(3, 5, true)
         }
