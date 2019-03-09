@@ -128,4 +128,37 @@ router.delete('/:pid/comment/:cid/:rcid', (req, res) => {
     }
 })
 
+router.post('/test1', (req, res) => {
+    const { pid, uid, text } = req.body
+    Post.findOneAndUpdate(
+        { 'id': pid },
+        { $push: { 
+            'comments': {
+                'uid': uid,
+                'commentedOn': new Date(),
+                'text': text,
+                'valid': true,
+                'modified': false,
+                'recomments': [],
+            },
+        }},
+    ).then(data => res.send(data))
+})
+
+router.post('/test2', (req, res) => {
+    const { pid, uid, cid, text } = req.body
+    Post.findOneAndUpdate(
+        { 'id': pid, 'comments._id': cid },
+        { $push: { 
+            'comments.$.recomments': {
+                'uid': uid,
+                'recommentedOn': new Date(),
+                'text': text,
+                'valid': true,
+                'modified': false,
+            },
+        }},
+    ).then(data => res.send(data))
+})
+
 module.exports = router
