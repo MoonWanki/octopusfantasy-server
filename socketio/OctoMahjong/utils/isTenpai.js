@@ -76,6 +76,7 @@ const guksa = (GuksaHeader, Header, tiles, t) => {
             tmp.push(tile)
             winning.push({
                 melds: sorting(tmp),
+                wait: "",
                 tile: tile
             })
         }
@@ -98,6 +99,7 @@ const guksa = (GuksaHeader, Header, tiles, t) => {
                 arr.push(revertTile(i))
                 winning.push({
                     melds: [sorting(arr)],
+                    wait: "",
                     tile: revertTile(i)
                 })
             }
@@ -160,6 +162,7 @@ module.exports = function(tiles) {
             })
             winningTile.push({
                 melds: meld,
+                wait: "tanki",
                 tile: revertTile(i)
             })
             break
@@ -167,15 +170,17 @@ module.exports = function(tiles) {
         Header.forEach(pair => {
             let LocalTiles = t.slice()
             let meld = []
-            /* remove open-tile in here */
+            let wait = "tanki"
             LocalTiles[pair] -= 2
-
             // body elimination
             for(let j = 0; j < LocalTiles.length;) {
                 let flag = false
                 //pon elimination
                 if(LocalTiles[j] > 2) {
                     meld.push([revertTile(j),revertTile(j),revertTile(j)])
+                    if(i == j) {
+                        wait = "shanpon"
+                    }
                     LocalTiles[j] -= 3
                 }
                 if(parseInt(j/9) != parseInt((j+1)/9) || parseInt(j/9) != parseInt((j+2)/9)) {
@@ -185,6 +190,16 @@ module.exports = function(tiles) {
                 if(j < 25 && (LocalTiles[j] > 0) && (LocalTiles[j+1] >= LocalTiles[j]) && (LocalTiles[j+2] >= LocalTiles[j])) {
                     // chi elimination
                     meld.push([revertTile(j), revertTile(j+1), revertTile(j+2)])
+                    if(i == j+1) {
+                        // 간짱
+                        wait = "kan"
+                    }
+                    else if(i == j || i == j+2) {
+                        // 양면대기
+                        wait = "ryan"
+                        if((i == j+2 && (j == 0 || j == 9 || j == 18)) || (i == j && (j+2 == 8 || j+2 == 17 || j+2 == 26)))
+                        wait = "pen"
+                    }
                     LocalTiles[j] -= 1
                     LocalTiles[j+1] -= 1
                     LocalTiles[j+2] -= 1
@@ -198,10 +213,15 @@ module.exports = function(tiles) {
                 meld.push([revertTile(pair), revertTile(pair)])
                 winningTile.push({
                     melds: meld,
+                    wait: wait,
                     tile: revertTile(i)
                 })
             }
         })
+    }
+    for(var result of winningTile) {
+        const {melds, wait, tile} = result
+        console.log("wait : ", wait)
     }
     return winningTile
 }
