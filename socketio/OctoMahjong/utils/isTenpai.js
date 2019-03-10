@@ -18,17 +18,17 @@ const revertTile = input => {
     if(input < 27) {
         type = 1 + parseInt(input / 9)
         number = 1 + (input % 9)
-        return [type, number]
+        return new Tile(type, number)
     }
     else {
         if(input < 31) {
             type = 4
             number = input - 26
-            return [type, number]
+            return new Tile(type, number)
         } else {
             type = 5
             number = input - 30
-            return [type, number]
+            return new Tile(type, number)
         }
     }
 }
@@ -36,12 +36,15 @@ const revertTile = input => {
 const sorting = input => {
     const sorted = input.sort(function(a, b) {
         if(a.type == b.type) {
-            if(a.number >= b.number)
+            if(a.number > b.number)
                 return 1
             else
                 return -1
         }
-        return a.type > b.type
+        else if(a.type > b.type)
+            return 1
+        else
+            return -1
     })
     return sorted
 }
@@ -59,24 +62,47 @@ const findPairs = input => {
     return pairs
 }
 
-const guksa = (GuksaHeader, Header, tiles) => {
-    ex = [
+const guksa = (GuksaHeader, Header, tiles, t) => {
+    let ex = [
         new Tile(1, 1), new Tile(1, 9), new Tile(2, 1), new Tile(2, 9), new Tile(3, 1),
         new Tile(3, 9), new Tile(4, 1), new Tile(4, 2), new Tile(4, 3), new Tile(4, 4),
         new Tile(5, 1), new Tile(5, 2), new Tile(5, 3)
     ]
+    let winning = new Array()
     if(GuksaHeader.length === 0) { // 13 tile return
-        return ex
+        let winning = new Array()
+        for(const tile of ex) {
+            let tmp = ex.slice()
+            tmp.push(tile)
+            winning.push({
+                melds: sorting(tmp),
+                tile: tile
+            })
+        }
+        return winning
     }
     if(Header.length > 0) { // 1 tile return
         let tmp = convertTile(sorting(ex))
         for(let i = 0; i < tmp.length; i++) {
-            if(tmp[i] != 0 && tiles[i] === 0) {
-                const tile = revertTile(i)
-                return [new Tile(tile[0], tile[1])]
+            if(tmp[i] != 0 && t[i] === 0) {
+                let arr = new Array()
+                for(let j = 0; j < tiles.length;) {
+                    if(tiles[j] != 0) {
+                        //insert
+                        arr.push(revertTile(j))
+                        tiles[j]--
+                    }
+                    else
+                        j++
+                }
+                arr.push(revertTile(i))
+                winning.push({
+                    melds: [sorting(arr)],
+                    tile: revertTile(i)
+                })
             }
         }
-        return []
+        return winning
     }
 }
 
@@ -84,8 +110,13 @@ module.exports = function(tiles) {
     var winningTile = new Array()
     var meldNum = 0
 
-    if(tiles.length == 1)
-        return tiles
+    if(tiles.length == 1) {
+        winningTile.push({
+            melds: [tiles],
+            tile: tiles
+        })
+        return winningTile
+    }
     else {
         meldNum = (tiles.length - 1)/3
     }
@@ -117,15 +148,20 @@ module.exports = function(tiles) {
         // header candidate extract
         const Header = findPairs(t)
         //Thirteen orphan process
-        if(Guksa) {
-            winningTile = guksa(GuksaHeader, Header, t)
-            return winningTile
+        if(Guksa && meldNum == 4) {
+            return guksa(GuksaHeader, Header, tiles, t)
         }
 
         // Chitoitsu check
         if(Header.length > 6) {
-            const tile = revertTile(i)
-            winningTile.push(new Tile(tile[0], tile[1]))
+            meld = new Array()
+            Header.forEach(head => {
+                meld.push([revertTile(head), revertTile(head)])
+            })
+            winningTile.push({
+                melds: meld,
+                tile: revertTile(i)
+            })
             break
         }
         Header.forEach(pair => {
@@ -139,7 +175,7 @@ module.exports = function(tiles) {
                 let flag = false
                 //pon elimination
                 if(LocalTiles[j] > 2) {
-                    meld.push([j,j,j])
+                    meld.push([revertTile(j),revertTile(j),revertTile(j)])
                     LocalTiles[j] -= 3
                 }
                 if(parseInt(j/9) != parseInt((j+1)/9) || parseInt(j/9) != parseInt((j+2)/9)) {
@@ -148,7 +184,7 @@ module.exports = function(tiles) {
                 }
                 if(j < 25 && (LocalTiles[j] > 0) && (LocalTiles[j+1] >= LocalTiles[j]) && (LocalTiles[j+2] >= LocalTiles[j])) {
                     // chi elimination
-                    meld.push([j, j+1, j+2])
+                    meld.push([revertTile(j), revertTile(j+1), revertTile(j+2)])
                     LocalTiles[j] -= 1
                     LocalTiles[j+1] -= 1
                     LocalTiles[j+2] -= 1
@@ -159,17 +195,11 @@ module.exports = function(tiles) {
                 }
             }
             if(meld.length === meldNum) {
-                let flag = true
-                const tile = revertTile(i)
-                for(let i = 0; i < winningTile.length; i++) {
-                    if(JSON.stringify(winningTile[i]) == JSON.stringify(new Tile(tile[0], tile[1]))) {
-                        flag = false
-                        break
-                    }
-                }
-                if(flag) {
-                    winningTile.push(new Tile(tile[0], tile[1]))
-                }
+                meld.push([revertTile(pair), revertTile(pair)])
+                winningTile.push({
+                    melds: meld,
+                    tile: revertTile(i)
+                })
             }
         })
     }
