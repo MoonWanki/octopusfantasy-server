@@ -1,7 +1,7 @@
 const Hand = require('./Hand')
 const Tile = require('./Tile')
 const isTenpai = require('./utils/isTenpai')
-const getYakus = require('./utils/getYakus')
+const getResult = require('./utils/getResult')
 
 class Rotation {
 
@@ -57,10 +57,10 @@ class Rotation {
         else if(player.hand.isClosed && !player.didRiichi && !player.didDoubleRiichi) {
             const allTilesInHand = player.hand.closed.concat(this.tsumoTile)
             let giriTilesToRiichi = new Array()
-            allTilesInHand.forEach((_, i) => {
+            allTilesInHand.forEach((t, i) => {
                 const sliced = allTilesInHand.slice(i, i+1)
                 const agariTiles = isTenpai(sliced)
-                if(agariTiles.length) giriTilesToRiichi = giriTilesToRiichi.concat(agariTiles)
+                if(agariTiles.length) giriTilesToRiichi = giriTilesToRiichi.concat(t)
             })
             if(giriTilesToRiichi.length) {
                 canRiichi = true
@@ -107,10 +107,10 @@ class Rotation {
     }
     
     // player's choice callback 2: Tsumo agari
-    onPlayerTsumoAgari(player, agariTile) {
+    onPlayerTsumoAgari(player) {
         this.removePlayerChoice(player)
 
-        const yakus = getYakus(this, player)
+        const yakus = getResult(this, player)
         // TODO: handle tsumo agari
     }
 

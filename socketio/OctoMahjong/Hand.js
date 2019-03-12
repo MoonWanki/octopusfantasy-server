@@ -13,6 +13,7 @@ class Hand {
         this.agariTiles = null // set only by HandCalculator.isTenpai()
 
         this.isTenpai = false
+        this.isClosed = true
 
         this.checkTenpai()
     }
@@ -51,10 +52,6 @@ class Hand {
         if(idx != -1) allClosedTiles.splice(idx, 1)
         this.closed = allClosedTiles
         this.checkTenpai()
-    }
-    
-    isClosed() {
-        return this.opened.length == 0
     }
 }
 
