@@ -1,7 +1,9 @@
+// 김대리
+
 module.exports = (rotation, player) => {
     const { wind, round, turn } = rotation
     const { didRiichi, didDoubleRiichi, wind: playerWind } = player
-    const { closed, opened } = player.hand
+    const { closed, opened, tsumoTile } = player.hand
 
     const yakus = new Array()
 
