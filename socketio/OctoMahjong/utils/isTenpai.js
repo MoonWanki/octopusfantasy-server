@@ -210,18 +210,16 @@ module.exports = function(tiles) {
                 }
             }
             if(meld.length === meldNum) {
-                meld.push([revertTile(pair), revertTile(pair)])
+                const head = new Array()
+                head.push([revertTile(pair), revertTile(pair)])
                 winningTile.push({
                     melds: meld,
+                    head: head,
                     wait: wait,
                     tile: revertTile(i)
                 })
             }
         })
-    }
-    for(var result of winningTile) {
-        const {melds, wait, tile} = result
-        console.log("wait : ", wait)
     }
     return winningTile
 }
