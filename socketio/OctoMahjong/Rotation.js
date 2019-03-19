@@ -110,7 +110,7 @@ class Rotation {
     onPlayerTsumoAgari(player) {
         this.removePlayerChoice(player)
 
-        const yakus = getResult(this, player)
+        const yakus = getResult(this, player, true)
         // TODO: handle tsumo agari
     }
 
