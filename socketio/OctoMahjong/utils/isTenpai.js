@@ -76,6 +76,7 @@ const guksa = (GuksaHeader, Header, tiles, t) => {
             tmp.push(tile)
             winning.push({
                 melds: sorting(tmp),
+                head: [],
                 wait: "",
                 tile: tile
             })
@@ -99,6 +100,7 @@ const guksa = (GuksaHeader, Header, tiles, t) => {
                 arr.push(revertTile(i))
                 winning.push({
                     melds: [sorting(arr)],
+                    head: [],
                     wait: "",
                     tile: revertTile(i)
                 })
@@ -114,8 +116,10 @@ module.exports = function(tiles) {
 
     if(tiles.length == 1) {
         winningTile.push({
-            melds: [tiles],
-            tile: tiles
+            melds: [],
+            head: [[tiles[0], tiles[0]]],
+            wait: "tanki",
+            tile: tiles[0]
         })
         return winningTile
     }
@@ -162,6 +166,7 @@ module.exports = function(tiles) {
             })
             winningTile.push({
                 melds: meld,
+                head: [],
                 wait: "tanki",
                 tile: revertTile(i)
             })
