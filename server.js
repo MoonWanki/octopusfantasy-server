@@ -2,16 +2,18 @@ require('dotenv').config()
 
 const http = require('http')
 const expressSession = require('express-session')
-const mongoStore = require('connect-mongo')(expressSession)
-const port = process.env.PORT || 4500
+const MongoStore = require('connect-mongo')
+const port = process.env.PORT || 4000
 
 // session for both express and socketIO
 const session = expressSession({
     name: 'OctopusFantasy',
-    secret: 'encryptionPrivateKey',
+    secret: 'keyboard cat',
     resave: false,
     saveUninitialized: true,
-    store: new mongoStore({ url: process.env.MONGO_URI }),
+    store: MongoStore.create({
+        mongoUrl: process.env.MONGO_URI,
+    }),
 })
 
 // get express app

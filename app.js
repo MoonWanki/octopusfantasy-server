@@ -1,5 +1,4 @@
 const express = require('express')
-const bodyParser = require('body-parser')
 const mongoose = require('mongoose')
 const cors = require('cors')
 const helmet = require('helmet')
@@ -11,12 +10,12 @@ module.exports = session => {
     app.use(session)
 
     app.use(express.static('public'))
-    app.use(bodyParser.urlencoded({ extended: true }))
-    app.use(bodyParser.json())
+    app.use(express.urlencoded({ extended: true }))
+    app.use(express.json())
 
     // DB connection
     mongoose.Promise = global.Promise
-    mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true })
+    mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('MongoDB Connected'))
     .catch(e => console.error(e))
 
