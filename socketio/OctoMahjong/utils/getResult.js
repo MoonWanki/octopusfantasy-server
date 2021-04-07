@@ -264,9 +264,8 @@ const yakuhai = (body, wind, playerWind) => { // 1 : 東 | 2 : 南 | 3 : 西 | 4
         if((arr[0].type == arr[1].type || arr[1].type == arr[2].type) && (arr[0].number == arr[1].number || arr[1].number == arr[2].number)) {
             if(arr[0].type == 5) {
                 cnt++
-                continue
             }
-            if(arr[0].type == 4) {
+            else if(arr[0].type == 4) {
                 if(arr[0].number == wind) { cnt++ }
                 if(arr[0].number == playerWind) { cnt++ }
             }
